@@ -17,6 +17,10 @@ Leia a documentação completa em: https://cajudev.readthedocs.io/pt/latest/arra
 -   Segue os padrões PSR-1, PSR-2 e PSR-4
 -   Testes unitários com PHPUnit
 
+## Instalação
+
+Realize a instalação utilizando o seguinte comando ``composer require cajudev/arrays``
+
 ## Contribuindo
 
 Faça um fork deste projeto e envie seus pull requests para averiguação. É necessário que todos os métodos sejam testados e passem pela análise do travis.
