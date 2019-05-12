@@ -1,0 +1,36 @@
+{
+    "name": "cajudev/arrays",
+    "description": "Making php more object oriented.",
+    "keywords": [
+        "object oriented",
+        "array",
+        "collection",
+        "composer",
+        "php"
+    ],
+    "license": "MIT",
+    "homepage": "https://github.com/cajudev/arrays",
+    "type": "library",
+    "authors": [
+        {
+            "name": "Richard Lopes",
+            "email": "contato.richardlopes@outlook.com"
+        }
+    ],
+    "autoload": {
+        "psr-4": {
+            "Cajudev\\": [
+                "src/",
+                "tests/"
+            ]
+        }
+    },
+    "require": {
+        "php": "^7.0"
+    },
+    "require-dev": {
+        "phpunit/phpunit": "*",
+        "php-coveralls/php-coveralls": "^2",
+        "phpdocumentor/phpdocumentor": "2.*"
+    }
+}
