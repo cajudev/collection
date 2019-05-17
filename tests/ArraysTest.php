@@ -37,6 +37,41 @@ class ArraysTest extends TestCase
         self::assertNull($arrays);
     }
 
+    public function test_accumulate_without_initializate()
+    {
+        $arrays = new Arrays();
+        $arrays['sum'] += 10;
+        self::assertEquals(10, $arrays['sum']);
+    }
+
+    public function test_subtract_without_initializate()
+    {
+        $arrays = new Arrays();
+        $arrays['sub'] -= 10;
+        self::assertEquals(-10, $arrays['sub']);
+    }
+
+    public function test_multiply_without_initializate()
+    {
+        $arrays = new Arrays();
+        $arrays['mult'] *= 10;
+        self::assertEquals(0, $arrays['mult']);
+    }
+
+    public function test_divide_without_initializate()
+    {
+        $arrays = new Arrays();
+        $arrays['div'] /= 10;
+        self::assertEquals(0, $arrays['div']);
+    }
+
+    public function test_concat_without_initializate()
+    {
+        $arrays = new Arrays();
+        $arrays['concat'] .= "Olá";
+        self::assertEquals('Olá', $arrays['concat']);
+    }
+
     public function test_pushing_several_values()
     {
         $arrays = new Arrays();
