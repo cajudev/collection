@@ -411,16 +411,6 @@ class ArraysTest extends TestCase
         self::assertEquals($expect, $arrays->get());
     }
 
-    public function test_isArray_should_return_true()
-    {
-        self::assertEquals(true, Arrays::isArray([1,2,3,4,5]));
-    }
-
-    public function test_isArray_should_return_false()
-    {
-        self::assertEquals(false, Arrays::isArray('1,2,3,4,5'));
-    }
-
     public function test_chunk()
     {
         $arrays = new Arrays([1, 2, 3, 4, 5]);
@@ -574,4 +564,47 @@ class ArraysTest extends TestCase
         $expect = ['two' => 2, 'three' => 3, 'eight' => 8];
         self::assertSame($expect, $arrays->get());
     }
+
+    public function teste_is_int()
+    {
+        $arrays = new Arrays();
+        $arrays['int'] = 10;
+        self::assertTrue($arrays->isInt('int'));
+    }
+
+    public function teste_is_bool()
+    {
+        $arrays = new Arrays();
+        $arrays['bool'] = true;
+        self::assertTrue($arrays->isBool('bool'));
+    }
+
+    public function teste_is_float()
+    {
+        $arrays = new Arrays();
+        $arrays['float'] = 10.00;
+        self::assertTrue($arrays->isFloat('float'));
+    }
+
+    public function teste_is_numeric()
+    {
+        $arrays = new Arrays();
+        $arrays['number'] = 0x0001;
+        self::assertTrue($arrays->isNumeric('number'));
+    }
+
+    public function teste_is_string()
+    {
+        $arrays = new Arrays();
+        $arrays['string'] = 'lorem';
+        self::assertTrue($arrays->isString('string'));
+    }
+
+    public function teste_is_array()
+    {
+        $arrays = new Arrays();
+        $arrays['array'] = [1, 2, 3];
+        self::assertTrue($arrays->isArray('array'));
+    }
+
 }

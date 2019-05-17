@@ -3,14 +3,15 @@
 namespace Cajudev;
 
 use Cajudev\Interfaces\Sortable;
-use Cajudev\Exceptions\MalformedException;
+use Cajudev\Interfaces\Mixed;
 
-final class Arrays implements \ArrayAccess, \Iterator, \Countable, Sortable
+final class Arrays implements \ArrayAccess, \Iterator, \Countable, Sortable, Mixed
 {
     use \Cajudev\Traits\ArrayAccessTrait;
     use \Cajudev\Traits\IteratorTrait;
     use \Cajudev\Traits\CountableTrait;
     use \Cajudev\Traits\SortableTrait;
+    use \Cajudev\Traits\MixedTrait;
 
     private const BREAK    = 'break';
     private const CONTINUE = 'continue';
@@ -344,20 +345,6 @@ final class Arrays implements \ArrayAccess, \Iterator, \Countable, Sortable
     public function __toString()
     {
         return json_encode($this->get(), JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE);
-    }
-
-    /* ============== STATIC METHODS ============== */
-
-    /**
-     * Verify whether a element is an array
-     *
-     * @param  mixed $array
-     *
-     * @return bool
-     */
-    public static function isArray($array): bool
-    {
-        return is_array($array);
     }
 
     /**
