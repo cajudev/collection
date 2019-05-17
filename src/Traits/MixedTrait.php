@@ -12,7 +12,7 @@ trait MixedTrait
      */
     public function isInt(string $key): bool
     {
-        return is_int($this->content[$key] ?? null);
+        return is_int($this[$key]);
     }
 
     /** 
@@ -22,7 +22,7 @@ trait MixedTrait
      */
     public function isBool(string $key): bool
     {
-        return is_bool($this->content[$key] ?? null);
+        return is_bool($this[$key]);
     }
 
     /** 
@@ -32,7 +32,7 @@ trait MixedTrait
      */
     public function isFloat(string $key): bool
     {
-        return is_float($this->content[$key] ?? null);
+        return is_float($this[$key]);
     }
 
     /** 
@@ -42,7 +42,7 @@ trait MixedTrait
      */
     public function isNumeric(string $key): bool
     {
-        return is_numeric($this->content[$key] ?? null);
+        return is_numeric($this[$key]);
     }
 
     /** 
@@ -52,7 +52,7 @@ trait MixedTrait
      */
     public function isString(string $key): bool
     {
-        return is_string($this->content[$key] ?? null);
+        return is_string($this[$key]);
     }
 
     /** 
@@ -62,7 +62,7 @@ trait MixedTrait
      */
     public function isArray(string $key): bool
     {
-        return is_array($this->content[$key] ?? null);
+        return $this[$key] instanceof static;
     }
 
 }

@@ -568,8 +568,8 @@ class ArraysTest extends TestCase
     public function teste_is_int()
     {
         $arrays = new Arrays();
-        $arrays['int'] = 10;
-        self::assertTrue($arrays->isInt('int'));
+        $arrays['number']['int'] = 10;
+        self::assertTrue($arrays->isInt('number.int'));
     }
 
     public function teste_is_bool()
@@ -582,8 +582,8 @@ class ArraysTest extends TestCase
     public function teste_is_float()
     {
         $arrays = new Arrays();
-        $arrays['float'] = 10.00;
-        self::assertTrue($arrays->isFloat('float'));
+        $arrays['number']['float'] = 10.00;
+        self::assertTrue($arrays->isFloat('number.float'));
     }
 
     public function teste_is_numeric()
