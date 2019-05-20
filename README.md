@@ -10,7 +10,7 @@
 
 Uma maneira de escrever códigos em php de maneira mais orientada à objetos
 
-Leia a documentação completa em: https://cajudev.readthedocs.io/pt/latest/arrays
+Leia a documentação completa em: https://cajudev.readthedocs.io/pt_BR/latest/arrays
 
 ## Características
 
