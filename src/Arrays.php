@@ -5,7 +5,7 @@ namespace Cajudev;
 use Cajudev\Interfaces\Sortable;
 use Cajudev\Interfaces\Mixed;
 
-final class Arrays implements \ArrayAccess, \Iterator, \Countable, Sortable, Mixed
+class Arrays implements \ArrayAccess, \Iterator, \Countable, Sortable, Mixed
 {
     use \Cajudev\Traits\ArrayAccessTrait;
     use \Cajudev\Traits\IteratorTrait;
