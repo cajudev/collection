@@ -394,7 +394,7 @@ class Arrays implements \ArrayAccess, \Iterator, \Countable, Sortable, Mixed
     */
     public static function isArrays($object): bool
     {
-        return $object instanceof self;
+        return $object instanceof static;
     }
 
     /**
@@ -426,11 +426,11 @@ class Arrays implements \ArrayAccess, \Iterator, \Countable, Sortable, Mixed
      */
     public static function combine($keys, $values): self
     {
-        if ($keys instanceof self) {
+        if ($keys instanceof static) {
             $keys = $keys->get();
         }
 
-        if ($values instanceof self) {
+        if ($values instanceof static) {
             $values = $values->get();
         }
         
