@@ -313,7 +313,7 @@ class Arrays implements \ArrayAccess, \Iterator, \Countable, Sortable, Mixed
 
         $array = [];
         foreach ($keys as $key) {
-            $array = $array ? $array->offsetGet($key) : $this->offsetGet($key);
+            $array = $array ? ($array[$key] ?? null) : ($this[$key] ?? null);
         }
         return $array;
     }
