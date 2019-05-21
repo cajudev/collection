@@ -123,6 +123,31 @@ class Arrays implements \ArrayAccess, \Iterator, \Countable, Sortable, Mixed
     }
 
     /**
+     * Filter the array using a callable function
+     *
+     * @param  callable $handle
+     *
+     * @return self
+     */
+    public function filter(callable $handle): self
+    {
+        $this->content = array_filter($this->content, $handle, ARRAY_FILTER_USE_BOTH);
+        return $this;
+    }
+
+    /**
+     * Reduce the array to a single value
+     *
+     * @param  callable $handle
+     *
+     * @return self
+     */
+    public function reduce(callable $handle, $initial = null)
+    {
+        return array_reduce($this->content, $handle, $initial);
+    }
+
+    /**
      * Determine if a key is set and it's value is not null
      *
      * @param  mixed $key

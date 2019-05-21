@@ -421,6 +421,26 @@ class ArraysTest extends TestCase
         self::assertEquals($expect, $arrays->get());
     }
 
+    public function test_filter()
+    {
+        $arrays = new Arrays([1, 2, 3, 4, 5, 6, 7, 8, 9]);
+        $arrays->filter(function($value, $key) {
+            return $value < 5;
+        });
+        $expect = [1, 2, 3, 4];
+        self::assertEquals($expect, $arrays->get());
+    }
+
+    public function test_reduce()
+    {
+        $arrays = new Arrays([1, 2, 3, 4]);
+        $result = $arrays->reduce(function($a, $b) {
+            return $a + $b;
+        });
+        $expect = 10;
+        self::assertEquals($expect, $result);
+    }
+
     public function test_chunk()
     {
         $arrays = new Arrays([1, 2, 3, 4, 5]);
