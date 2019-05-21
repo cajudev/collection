@@ -37,6 +37,16 @@ class ArraysTest extends TestCase
         self::assertNull($arrays);
     }
 
+    public function test_setting_values()
+    {
+        $regularArray = ['lorem' => 'ipsum', 'dolor' => ['sit' => 'amet'], 'lorem'];
+        $arrays = new Arrays();
+        $arrays->set('ipsum', 'lorem');
+        $arrays->set('amet', 'dolor.sit');
+        $arrays->set('lorem');
+        self::assertSame($regularArray, $arrays->get());
+    }
+
     public function test_accumulate_without_initializate()
     {
         $arrays = new Arrays();

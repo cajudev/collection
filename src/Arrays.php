@@ -310,12 +310,24 @@ class Arrays implements \ArrayAccess, \Iterator, \Countable, Sortable, Mixed
         if (!$keys) {
             return $this->content;
         }
+        return $this[implode('.', $keys)];
+    }
 
-        $array = [];
-        foreach ($keys as $key) {
-            $array = $array ? ($array[$key] ?? null) : ($this[$key] ?? null);
+    /**
+     * Insert a value in a associated key
+     *
+     * @param  mixed $keys
+     *
+     * @return mixed
+     */
+    public function set($value, ...$keys)
+    {
+        if (!$keys) {
+            $this[] = $value;
+        } else {
+            $this[implode('.', $keys)] = $value;
         }
-        return $array;
+        return $this;
     }
 
     /**
