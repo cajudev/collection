@@ -132,6 +132,7 @@ class Arrays implements \ArrayAccess, \Iterator, \Countable, Sortable, Mixed
     public function filter(callable $handle): self
     {
         $this->content = array_filter($this->content, $handle, ARRAY_FILTER_USE_BOTH);
+        $this->count();
         return $this;
     }
 
