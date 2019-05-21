@@ -336,7 +336,7 @@ class Arrays implements \ArrayAccess, \Iterator, \Countable, Sortable, Mixed
         if (!$keys) {
             return $this->content;
         }
-        return $this[implode('.', $keys)];
+        return $this[implode('.', $keys)] ?? null;
     }
 
     /**
