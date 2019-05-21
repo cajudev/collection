@@ -114,7 +114,7 @@ trait ArrayAccessTrait
         }
         
         if (is_array($ret)) {
-            $return = (new Arrays())->setByReference($ret);
+            $return = (new static())->setByReference($ret);
             return $return;
         }
 

@@ -223,7 +223,7 @@ class Arrays implements \ArrayAccess, \Iterator, \Countable, Sortable, Mixed
      */
     public function keys(): self
     {
-        return new self(array_keys($this->content));
+        return new static(array_keys($this->content));
     }
 
     /**
@@ -233,7 +233,7 @@ class Arrays implements \ArrayAccess, \Iterator, \Countable, Sortable, Mixed
      */
     public function values(): self
     {
-        return new self(array_values($this->content));
+        return new static(array_values($this->content));
     }
 
     /**
@@ -246,7 +246,7 @@ class Arrays implements \ArrayAccess, \Iterator, \Countable, Sortable, Mixed
      */
     public function column($key, $index = null): ?self
     {
-        return new self(array_column($this->content, $key));
+        return new static(array_column($this->content, $key));
     }
     
     /**
@@ -372,7 +372,7 @@ class Arrays implements \ArrayAccess, \Iterator, \Countable, Sortable, Mixed
             return null;
         }
 
-        $vars = new self((array) $object);
+        $vars = new static((array) $object);
         return $vars->map(function($key, $value) {
             return [preg_replace('/.*\0(.*)/', '\1', $key), $value];
         });
@@ -396,6 +396,6 @@ class Arrays implements \ArrayAccess, \Iterator, \Countable, Sortable, Mixed
             $values = $values->get();
         }
         
-        return new self(array_combine($keys, $values));
+        return new static(array_combine($keys, $values));
     }
 }
