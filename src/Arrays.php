@@ -2,16 +2,18 @@
 
 namespace Cajudev;
 
-use Cajudev\Interfaces\Sortable;
+use Cajudev\Interfaces\Set;
 use Cajudev\Interfaces\Mixed;
+use Cajudev\Interfaces\Sortable;
 
-class Arrays implements \ArrayAccess, \Iterator, \Countable, Sortable, Mixed
+class Arrays implements \ArrayAccess, \Iterator, \Countable, Sortable, Mixed, Set
 {
-    use \Cajudev\Traits\ArrayAccessTrait;
+    use \Cajudev\Traits\SetTrait;
+    use \Cajudev\Traits\MixedTrait;
+    use \Cajudev\Traits\SortableTrait;
     use \Cajudev\Traits\IteratorTrait;
     use \Cajudev\Traits\CountableTrait;
-    use \Cajudev\Traits\SortableTrait;
-    use \Cajudev\Traits\MixedTrait;
+    use \Cajudev\Traits\ArrayAccessTrait;
 
     private const BREAK    = 'break';
     private const CONTINUE = 'continue';
@@ -143,9 +145,14 @@ class Arrays implements \ArrayAccess, \Iterator, \Countable, Sortable, Mixed
      *
      * @return self
      */
-    public function reduce(callable $handle, $initial = null)
+    public function reduce(callable $handle)
     {
-        return array_reduce($this->content, $handle, $initial);
+        $initial = array_shift($this->content);
+        $result  = array_reduce($this->content, $handle, $initial);
+        if (is_array($result)) {
+            $result = new static($result);
+        }
+        return $result;
     }
 
     /**
@@ -288,6 +295,51 @@ class Arrays implements \ArrayAccess, \Iterator, \Countable, Sortable, Mixed
         $this->content = array_chunk($this->content, $size, $preserve_keys);
         $this->count();
         return $this;
+    }
+
+    /**
+     * Remove duplicated values
+     *
+     * @return self
+     */
+    public function unique(): self
+    {
+        $this->content = array_unique($this->content);
+        $this->count();
+        return $this;
+    }
+
+    /**
+     * Merge all sublevels of the array into one
+     *
+     * @return self
+     */
+    public function merge(): self
+    {
+        $this->content = $this->reduce('array_merge')->get();
+        $this->count();
+        return $this;
+    }
+
+    /**
+     * Reverse the order of the array
+     *
+     * @return self
+     */
+    public function reverse($preserveKeys = null): self
+    {
+        $this->content = array_reverse($this->content, $preserveKeys);
+        return $this;
+    }
+
+    /**
+     * Return a key from a value in array if it exists
+     *
+     * @return self
+     */
+    public function search($value, bool $strict = null): int
+    {
+        return array_search($value, $this->content, $strict);
     }
 
     /**

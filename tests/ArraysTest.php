@@ -595,46 +595,107 @@ class ArraysTest extends TestCase
         self::assertSame($expect, $arrays->get());
     }
 
-    public function teste_is_int()
+    public function test_is_int()
     {
         $arrays = new Arrays();
         $arrays['number']['int'] = 10;
         self::assertTrue($arrays->isInt('number.int'));
     }
 
-    public function teste_is_bool()
+    public function test_is_bool()
     {
         $arrays = new Arrays();
         $arrays['bool'] = true;
         self::assertTrue($arrays->isBool('bool'));
     }
 
-    public function teste_is_float()
+    public function test_is_float()
     {
         $arrays = new Arrays();
         $arrays['number']['float'] = 10.00;
         self::assertTrue($arrays->isFloat('number.float'));
     }
 
-    public function teste_is_numeric()
+    public function test_is_numeric()
     {
         $arrays = new Arrays();
         $arrays['number'] = 0x0001;
         self::assertTrue($arrays->isNumeric('number'));
     }
 
-    public function teste_is_string()
+    public function test_is_string()
     {
         $arrays = new Arrays();
         $arrays['string'] = 'lorem';
         self::assertTrue($arrays->isString('string'));
     }
 
-    public function teste_is_array()
+    public function test_is_array()
     {
         $arrays = new Arrays();
         $arrays['array'] = [1, 2, 3];
         self::assertTrue($arrays->isArray('array'));
     }
 
+    public function test_unique()
+    {
+        $arrays = new Arrays([1, 2, 3, 1, 2, 3, 1, 2, 3, 1, 2, 3]);
+        $arrays->unique();
+        $expect = [1, 2, 3];
+        self::assertSame($expect, $arrays->get());
+    }
+
+    public function test_merge()
+    {
+        $arrays = new Arrays([[1, 2], [2, 4], [4, 5, 13], [2, 3, 9]]);
+        $arrays->merge();
+        $expect = [1, 2, 2, 4, 4, 5, 13, 2, 3, 9];
+        self::assertSame($expect, $arrays->get());
+    }
+
+    public function test_reverse()
+    {
+        $arrays = new Arrays([1, 2, 3, 4, 5, 6, 7, 8, 9]);
+        $arrays->reverse();
+        $expect = [9, 8, 7, 6, 5, 4, 3, 2, 1];
+        self::assertSame($expect, $arrays->get());
+    }
+
+    public function test_search()
+    {
+        $arrays = new Arrays(['a', 'b', 'c', 'd', 'e']);
+        self::assertSame(3, $arrays->search('d'));
+    }
+
+    public function test_union()
+    {
+        $arrays = new Arrays([[1, 2], [2, 4], [4, 5, 13], [2, 3, 9]]);
+        $arrays->union();
+        $expect = [1, 2, 4, 5, 13, 3, 9];
+        self::assertSame($expect, $arrays->values()->get());
+    }
+
+    public function test_diff()
+    {
+        $arrays = new Arrays([[1, 2, 3, 4, 5, 6], [2, 4], [6, 1]]);
+        $arrays->diff();
+        $expect = [3, 5];
+        self::assertSame($expect, $arrays->values()->get());
+    }
+
+    public function test_intersect()
+    {
+        $arrays = new Arrays([[1, 2, 3, 4, 5, 6], [2, 3, 5, 6], [2, 3, 7, 9]]);
+        $arrays->intersect();
+        $expect = [2, 3];
+        self::assertSame($expect, $arrays->values()->get());
+    }
+
+    public function test_cartesian()
+    {
+        $arrays = new Arrays([[1, 2], [3, 4], [3, 5]]);
+        $arrays->cartesian();
+        $expect = [[1, 3, 3], [1, 3, 5], [1, 4, 3], [1, 4, 5], [2, 3, 3], [2, 3, 5], [2, 4, 3], [2, 4, 5]];
+        self::assertSame($expect, $arrays->get());
+    }
 }
