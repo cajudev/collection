@@ -149,8 +149,9 @@ class Arrays implements \ArrayAccess, \Iterator, \Countable, Sortable, Mixed, Se
      */
     public function reduce(callable $handle)
     {
-        $initial = array_shift($this->content);
-        $result  = array_reduce($this->content, $handle, $initial);
+        $content = $this->content;
+        $initial = array_shift($content);
+        $result  = array_reduce($content, $handle, $initial);
         if (is_array($result)) {
             $result = new static($result);
         }
@@ -292,7 +293,7 @@ class Arrays implements \ArrayAccess, \Iterator, \Countable, Sortable, Mixed, Se
      */
     public function column($key, $index = null): ?self
     {
-        return new static(array_column($this->content, $key));
+        return new static(array_column($this->content, $key, $index));
     }
     
     /**
@@ -339,9 +340,9 @@ class Arrays implements \ArrayAccess, \Iterator, \Countable, Sortable, Mixed, Se
      *
      * @return self
      */
-    public function reverse($preserveKeys = null): self
+    public function reverse($preserve_keys = null): self
     {
-        $this->content = array_reverse($this->content, $preserveKeys);
+        $this->content = array_reverse($this->content, $preserve_keys);
         return $this;
     }
 
