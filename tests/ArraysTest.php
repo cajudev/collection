@@ -6,12 +6,6 @@ use Cajudev\Strings;
 
 class ArraysTest extends TestCase
 {
-    public function test_creating_object() 
-    {
-        $arrays = new Arrays();
-        self::assertInstanceOf(Arrays::class, $arrays);
-    }
-
     public function test_creating_from_array()
     {
         $regularArray = ['lorem', 'ipsum', 'dolor', 'sit', 'amet,', 'consectetur', 'adipiscing', 'elit'];
@@ -696,6 +690,26 @@ class ArraysTest extends TestCase
         $arrays = new Arrays([[1, 2], [3, 4], [3, 5]]);
         $arrays->cartesian();
         $expect = [[1, 3, 3], [1, 3, 5], [1, 4, 3], [1, 4, 5], [2, 3, 3], [2, 3, 5], [2, 4, 3], [2, 4, 5]];
+        self::assertSame($expect, $arrays->get());
+    }
+
+    public function test_backup_restore()
+    {
+        $arrays = new Arrays(['lorem' => 1, 'ipsum' => 2, 'dolor' => 3]);
+        $arrays->backup();
+        $arrays->unset('lorem');
+        $arrays->unset('ipsum');
+        $arrays->unset('dolor');
+        $arrays->restore();
+        $expect = ['lorem' => 1, 'ipsum' => 2, 'dolor' => 3];
+        self::assertSame($expect, $arrays->get());
+    }
+
+    public function test_flip()
+    {
+        $arrays = new Arrays(['lorem' => 1, 'ipsum' => 2, 'dolor' => 3]);
+        $arrays->flip();
+        $expect = [1 => 'lorem', 2 => 'ipsum', 3 => 'dolor'];
         self::assertSame($expect, $arrays->get());
     }
 }

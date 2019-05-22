@@ -4,12 +4,14 @@ namespace Cajudev;
 
 use Cajudev\Interfaces\Set;
 use Cajudev\Interfaces\Mixed;
+use Cajudev\Interfaces\Backup;
 use Cajudev\Interfaces\Sortable;
 
-class Arrays implements \ArrayAccess, \Iterator, \Countable, Sortable, Mixed, Set
+class Arrays implements \ArrayAccess, \Iterator, \Countable, Sortable, Mixed, Set, Backup
 {
     use \Cajudev\Traits\SetTrait;
     use \Cajudev\Traits\MixedTrait;
+    use \Cajudev\Traits\BackupTrait;
     use \Cajudev\Traits\SortableTrait;
     use \Cajudev\Traits\IteratorTrait;
     use \Cajudev\Traits\CountableTrait;
@@ -242,11 +244,22 @@ class Arrays implements \ArrayAccess, \Iterator, \Countable, Sortable, Mixed, Se
     /**
      * Join array elements into string
      *
-     * @return void
+     * @return string
      */
     public function join(string $glue)
     {
         return implode($glue, $this->content);
+    }
+
+    /**
+     * Exchange all keys with their associated values
+     *
+     * @return self
+     */
+    public function flip(): self
+    {
+        $this->content = array_flip($this->content);
+        return $this;
     }
 
     /**
