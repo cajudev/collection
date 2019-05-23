@@ -113,6 +113,16 @@ class Arrays implements \ArrayAccess, \Iterator, \Countable, Sortable, Mixed, Se
     }
 
     /**
+     * Sum all values in the array
+     *
+     * @return mixed
+     */
+    public function sum()
+    {
+        return array_sum($this->content);
+    }
+
+    /**
      * Applies the callback to all elements
      *
      * @param  callable $handle

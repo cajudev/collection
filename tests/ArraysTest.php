@@ -712,4 +712,10 @@ class ArraysTest extends TestCase
         $expect = [1 => 'lorem', 2 => 'ipsum', 3 => 'dolor'];
         self::assertSame($expect, $arrays->get());
     }
+
+    public function test_sum()
+    {
+        $arrays = new Arrays([1, 2, 3, 4, 5, 6, 7, 8, 9]);
+        self::assertEquals(45, $arrays->sum());
+    }
 }
