@@ -17,5 +17,6 @@ trait BackupTrait
     public function restore() {
         $this->content = $this->backup;
         unset($this->backup);
+        $this->count();
     }
 }
