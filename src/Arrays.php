@@ -123,6 +123,16 @@ class Arrays implements \ArrayAccess, \Iterator, \Countable, Sortable, Mixed, Se
     }
 
     /**
+     * Check if the value exist in the array
+     *
+     * @return mixed
+     */
+    public function contains($value): bool
+    {
+        return in_array($value, $this->content);
+    }
+
+    /**
      * Applies the callback to all elements
      *
      * @param  callable $handle

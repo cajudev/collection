@@ -718,4 +718,16 @@ class ArraysTest extends TestCase
         $arrays = new Arrays([1, 2, 3, 4, 5, 6, 7, 8, 9]);
         self::assertEquals(45, $arrays->sum());
     }
+
+    public function test_contains_should_return_true()
+    {
+        $arrays = new Arrays([1, 2, 3, 4, 5, 6, 7, 8, 9]);
+        self::assertTrue($arrays->contains(7));
+    }
+
+    public function test_contains_should_return_false()
+    {
+        $arrays = new Arrays([1, 2, 3, 4, 5, 6, 7, 8, 9]);
+        self::assertFalse($arrays->contains(10));
+    }
 }
