@@ -6,14 +6,15 @@ use Cajudev\Strings;
 
 class ArraysTest extends TestCase
 {
-    public function test_creating_from_array()
+    public function test_creating_object_from_array()
     {
+        $arrays = new Arrays(['lorem', 'ipsum', 'dolor' => ['sit' => 'amet']]);
         $regularArray = ['lorem', 'ipsum', 'dolor', 'sit', 'amet,', 'consectetur', 'adipiscing', 'elit'];
         $arrays = new Arrays($regularArray);
         self::assertEquals($regularArray, $arrays->get());
     }
 
-    public function test_creating_from_object()
+    public function test_creating_from_object_should_parse_attributes()
     {
         $object = new class {
             private   $private = 'lorem';
@@ -25,20 +26,38 @@ class ArraysTest extends TestCase
         self::assertEquals($expect, $arrays->get());
     }
 
-    public function test_creating_from_object_should_return_false()
+    public function test_creating_from_invalid_object_should_return_null()
     {
         $arrays = Arrays::fromObject([1, 2, 3]);
         self::assertNull($arrays);
     }
 
-    public function test_setting_values()
+    public function test_method_set_passing_just_a_value()
     {
-        $regularArray = ['lorem' => 'ipsum', 'dolor' => ['sit' => 'amet'], 'lorem'];
         $arrays = new Arrays();
-        $arrays->set('ipsum', 'lorem');
-        $arrays->set('amet', 'dolor.sit');
         $arrays->set('lorem');
-        self::assertSame($regularArray, $arrays->get());
+        self::assertSame(['lorem'], $arrays->get());
+    }
+
+    public function test_method_set_with_value_and_key()
+    {
+        $arrays = new Arrays();
+        $arrays->set('lorem', 'ipsum');
+        self::assertSame(['ipsum' => 'lorem'], $arrays->get());
+    }
+
+    public function test_method_set_with_more_then_one_key()
+    {
+        $arrays = new Arrays();
+        $arrays->set('dolor', 'lorem', 'ipsum');
+        self::assertSame(['lorem' => ['ipsum' => 'dolor']], $arrays->get());
+    }
+
+    public function test_method_set_using_dot_notation()
+    {
+        $arrays = new Arrays();
+        $arrays->set('dolor', 'lorem.ipsum');
+        self::assertSame(['lorem' => ['ipsum' => 'dolor']], $arrays->get());
     }
 
     public function test_accumulate_without_initializate()
@@ -76,7 +95,21 @@ class ArraysTest extends TestCase
         self::assertEquals('Olá', $arrays['concat']);
     }
 
-    public function test_pushing_several_values()
+    public function test_push_one_value()
+    {
+        $arrays = new Arrays();
+        $arrays->push('lorem');
+        self::assertEquals(['lorem'], $arrays->get());
+    }
+
+    public function test_push_more_than_one_value()
+    {
+        $arrays = new Arrays();
+        $arrays->push('lorem', 'ipsum', 'dolor');
+        self::assertEquals(['lorem', 'ipsum', 'dolor'], $arrays->get());
+    }
+
+    public function test_push_different_type_of_values()
     {
         $arrays = new Arrays();
         $array = ['amet' => 'consectetur'];
@@ -93,15 +126,14 @@ class ArraysTest extends TestCase
         self::assertEquals($expect, $arrays->get());
     }
 
-    public function test_shift()
+    public function test_shift_value_from_array()
     {
         $arrays = new Arrays(['lorem', 'ipsum', 'dolor']);
-        $arrays->shift();
         $expect = ['ipsum', 'dolor'];
-        self::assertEquals($expect, $arrays->get());
+        self::assertEquals($expect, $arrays->shift()->get());
     }
 
-    public function test_pop()
+    public function test_pop_value_from_array()
     {
         $arrays = new Arrays(['lorem', 'ipsum', 'dolor']);
         $arrays->pop();
@@ -109,37 +141,63 @@ class ArraysTest extends TestCase
         self::assertEquals($expect, $arrays->get());
     }
 
-    public function test_getting_values_using_successive_get()
+    public function test_get_a_value_from_array()
+    {
+        $arrays = new Arrays(['lorem' => 'ipsum']);
+        self::assertEquals('ipsum', $arrays->get('lorem'));
+    }
+
+    public function test_get_values_using_successive_get()
     {
         $arrays = new Arrays(['lorem' => ['ipsum' => 'dolor'], 'sit' => 'amet']);
         $expect = 'dolor';
         self::assertEquals($expect, $arrays->get('lorem')->get('ipsum'));
     }
 
-    public function test_getting_values_using_several_keys_argument()
+    public function test_get_values_using_several_keys_argument()
     {
         $arrays = new Arrays([
             'lorem' => [
                 'ipsum' => [
                     'dolor' => 'sit'
                 ]
-            ], 'amet'
+            ]
         ]);
         $expect = 'sit';
         self::assertEquals($expect, $arrays->get('lorem', 'ipsum', 'dolor'));
     }
 
-    public function test_inserting_values_using_array_sintax()
+    public function test_get_values_using_dot_notation()
+    {
+        $arrays = new Arrays([
+            'lorem' => [
+                'ipsum' => [
+                    'dolor' => 'sit'
+                ]
+            ]
+        ]);
+        $expect = 'sit';
+        self::assertEquals($expect, $arrays->get('lorem.ipsum.dolor'));
+    }
+
+    public function test_get_inexistent_value_should_return_null()
+    {
+        $arrays = new Arrays(['lorem', 'ipsum']);
+        self::assertEquals(null, $arrays->get('dolor'));
+    }
+
+    public function test_set_a_value_using_array_sintax()
     {
         $arrays = new Arrays();
+        $arrays['lorem'] = 'ipsum';
+        self::assertEquals(['lorem' => 'ipsum'], $arrays->get());
+    }
 
-        $arrays['lorem']         = 'ipsum';
-        $arrays[]                = 'dolor';
-        $arrays['sit']['amet']   = 'amet';
-
-        $expect = ['lorem' => 'ipsum', 0 => 'dolor', 'sit' => ['amet' => 'amet']];
-        
-        self::assertEquals($expect, $arrays->get());
+    public function test_append_a_value_using_array_sintax()
+    {
+        $arrays = new Arrays();
+        $arrays[] = 'ipsum';
+        self::assertEquals(['ipsum'], $arrays->get());
     }
 
     public function test_accessing_invalid_keys_should_return_null()

@@ -17,11 +17,10 @@ class Arrays implements \ArrayAccess, \Iterator, \Countable, Sortable, Mixed, Se
     use \Cajudev\Traits\CountableTrait;
     use \Cajudev\Traits\ArrayAccessTrait;
 
-    private const BREAK    = 'break';
-    private const CONTINUE = 'continue';
+    protected const BREAK    = 'break';
+    protected const CONTINUE = 'continue';
 
-    private $content;
-    private $length;
+    protected $content;
 
     public function __construct(array $content = [])
     {
@@ -368,10 +367,8 @@ class Arrays implements \ArrayAccess, \Iterator, \Countable, Sortable, Mixed, Se
 
     /**
      * Return a key from a value in array if it exists
-     *
-     * @return self
      */
-    public function search($value, bool $strict = null): int
+    public function search($value, bool $strict = null)
     {
         return array_search($value, $this->content, $strict);
     }

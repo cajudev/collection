@@ -4,6 +4,8 @@ namespace Cajudev\Traits;
 
 trait BackupTrait
 {
+    protected $backup;
+
     /**
      * Create a backup of the content of array
      */   
@@ -16,7 +18,7 @@ trait BackupTrait
      */
     public function restore() {
         $this->content = $this->backup;
-        unset($this->backup);
+        $this->backup  = null;
         $this->count();
     }
 }

@@ -4,7 +4,7 @@ namespace Cajudev\Traits;
 
 trait CountableTrait
 {
-    private $length;
+    protected $length;
 
     /**
      * Count all elements of the array
