@@ -788,4 +788,51 @@ class ArraysTest extends TestCase
         $arrays = new Arrays([1, 2, 3, 4, 5, 6, 7, 8, 9]);
         self::assertFalse($arrays->contains(10));
     }
+
+    public function test_length_after_add_value() {
+        $arrays = new Arrays();
+        $arrays['lorem'] = 'ipsum';
+        self::assertEquals(1, $arrays->length);
+    }
+
+    public function test_length_after_override_value() {
+        $arrays = new Arrays();
+        $arrays['lorem'] = 'ipsum';
+        $arrays['lorem'] = 'dolor';
+        self::assertEquals(1, $arrays->length);
+    }
+
+    public function test_length_after_multidimensional_value() {
+        $arrays = new Arrays();
+        $arrays['lorem']['ipsum'] = 'dolor';
+        self::assertEquals(1, $arrays->length);
+    }
+
+    public function test_length_after_override_multidimensional_value() {
+        $arrays = new Arrays();
+        $arrays['lorem']['ipsum'] = 'dolor';
+        $arrays['lorem']['ipsum'] = 'amet';
+        self::assertEquals(1, $arrays->length);
+    }
+
+    public function test_length_after_add_value_dot_notation() {
+        $arrays = new Arrays();
+        $arrays['lorem.ipsum'] = 'dolor';
+        self::assertEquals(1, $arrays->length);
+    }
+
+    public function test_length_after_override_value_dot_notation() {
+        $arrays = new Arrays();
+        $arrays['lorem.ipsum'] = 'dolor';
+        $arrays['lorem.ipsum'] = 'amet';
+        self::assertEquals(1, $arrays->length);
+    }
+
+    public function test_length_after_unset_value() {
+        $arrays = new Arrays();
+        $arrays['lorem'] = 'dolor';
+        $arrays->unset('lorem');
+        self::assertEquals(0, $arrays->length);
+    }
+
 }

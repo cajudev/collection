@@ -23,19 +23,20 @@ trait ArrayAccessTrait
 
         if ($key === null) {
             $this->content[] = $value;
+            $this->increment();
         } elseif (preg_match('/^\w+$/', $key)) {
+            $this->incrementIfKeyNotExists($key);
             $this->content[$key] = $value;
         } elseif (preg_match_all('/(?<=\.|^)(?<key>\w+)(?=\.|$)/', $key, $keys)) {
+            $this->incrementIfKeyNotExists($keys['key'][0]);
             $ret =& $this->content;
-            while (count($keys['key']) > 1) {
+            while (count($keys['key']) > 0) {
                 $ret =& $ret[array_shift($keys['key'])];
             }
-            $ret[$keys['key'][0]] = $value;
+            $ret = $value;
         } else {
             throw new \InvalidArgumentException('Wrong Pattern');
         }
-
-        $this->increment();
     }
 
     /**
@@ -51,14 +52,14 @@ trait ArrayAccessTrait
             return isset($this->content[$key]);
         } elseif (preg_match_all('/(?<=\.|^)(?<key>\w+)(?=\.|$)/', $key, $keys)) {
             $ret =& $this->content;
-            while (count($keys['key']) > 1) {
+            while (count($keys['key']) > 0) {
                 $key = array_shift($keys['key']);
                 if (!isset($ret[$key])) {
                     return false;
                 }
                 $ret =& $ret[$key];
             }
-            return isset($ret[$keys['key'][0]]);
+            return isset($ret);
         } else {
             throw new \InvalidArgumentException('Wrong Pattern');
         }
@@ -74,6 +75,7 @@ trait ArrayAccessTrait
     public function offsetUnset($key)
     {
         if (preg_match('/^\w+$/', $key)) {
+            $this->decrement();
             unset($this->content[$key]);
         } elseif (preg_match_all('/(?<=\.|^)(?<key>\w+)(?=\.|$)/', $key, $keys)) {
             $ret =& $this->content;
@@ -88,8 +90,6 @@ trait ArrayAccessTrait
         } else {
             throw new \InvalidArgumentException('Wrong Pattern');
         }
-
-        $this->decrement();
     }
 
     /**
@@ -102,30 +102,35 @@ trait ArrayAccessTrait
     public function &offsetGet($key)
     {
         if (preg_match('/^\w+$/', $key)) {
+            $this->incrementIfKeyNotExists($key);
             $ret =& $this->content[$key];
         } elseif (preg_match_all('/(?<=\.|^)(?<key>\w+)(?=\.|$)/', $key, $keys)) {
+            $this->incrementIfKeyNotExists($keys['key'][0]);
             $ret =& $this->content;
-            while (count($keys['key']) > 1) {
+            while (count($keys['key']) > 0) {
                 $ret =& $ret[array_shift($keys['key'])];
             }
-            $ret =& $ret[$keys['key'][0]];
         } elseif (preg_match('/^(?<start>\w+):(?<end>\w+)$/', $key, $result)) {
             $start = $result['start'];
             $end   = $result['end'];
-            if ($start < $end) {
-                $ret = array_slice($this->content, $start, $end - $start + 1);
-            } else {
-                $ret = array_reverse(array_slice($this->content, $end, $start - $end + 1));
-            }
+            $ret   = $start < $end 
+                   ? array_slice($this->content, $start, $end - $start + 1)
+                   : array_reverse(array_slice($this->content, $end, $start - $end + 1));
         } else {
             throw new \InvalidArgumentException('Wrong Pattern');
         }
-        
+
         if (is_array($ret)) {
             $return = (new static())->setByReference($ret);
             return $return;
         }
 
         return $ret;
+    }
+
+    public function incrementIfKeyNotExists($key) {
+        if (!array_key_exists($key, $this->content)) {
+            $this->increment();
+        };
     }
 }
