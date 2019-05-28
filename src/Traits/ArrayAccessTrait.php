@@ -52,7 +52,11 @@ trait ArrayAccessTrait
         } elseif (preg_match_all('/(?<=\.|^)(?<key>\w+)(?=\.|$)/', $key, $keys)) {
             $ret =& $this->content;
             while (count($keys['key']) > 1) {
-                $ret =& $ret[array_shift($keys['key'])];
+                $key = array_shift($keys['key']);
+                if (!isset($ret[$key])) {
+                    return false;
+                }
+                $ret =& $ret[$key];
             }
             return isset($ret[$keys['key'][0]]);
         } else {
@@ -74,7 +78,11 @@ trait ArrayAccessTrait
         } elseif (preg_match_all('/(?<=\.|^)(?<key>\w+)(?=\.|$)/', $key, $keys)) {
             $ret =& $this->content;
             while (count($keys['key']) > 1) {
-                $ret =& $ret[array_shift($keys['key'])];
+                $key = array_shift($keys['key']);
+                if (!isset($ret[$key])) {
+                    return false;
+                }
+                $ret =& $ret[$key];
             }
             unset($ret[$keys['key'][0]]);
         } else {
