@@ -59,6 +59,7 @@ trait SetTrait
             $result = $append;
         }
         $this->content = $result;
+        $this->count();
         return $this;
     }
 }
