@@ -20,12 +20,39 @@ class Arrays implements \ArrayAccess, \Iterator, \Countable, Sortable, Mixed, Se
     protected const BREAK    = 'break';
     protected const CONTINUE = 'continue';
 
+    protected const KEY_NOTATION      = '/^\w+$/';
+    protected const DOT_NOTATION      = '/(?<=\.|^)(?<key>\w+)(?=\.|$)/';
+    protected const INTERVAL_NOTATION = '/^(?<start>\w+):(?<end>\w+)$/';
+
     protected $content;
 
-    public function __construct(array $content = [])
+    public function __construct($content = [])
     {
-        $this->content = $content;
+        $this->content = is_array($content) ? $content : $this->parseObject($content);
         $this->count();
+    }
+
+    /**
+     * Transform all properties of a object into an associative array
+     *
+     * @param  $object
+     *
+     * @return self
+     */
+    private function parseObject($object): array
+    {
+        if (!is_object($object)) {
+            throw new \InvalidArgumentException('Argument must be an array or object');
+        }
+
+        if ($object instanceof static) {
+            return $object->get();
+        }
+
+        $vars = (array) $object;
+        return array_column(array_map(function($key, $value) {
+            return [preg_replace('/.*\0(.*)/', '\1', $key), $value];
+        }, array_keys($vars), $vars), 1, 0);
     }
 
     /**
@@ -35,8 +62,9 @@ class Arrays implements \ArrayAccess, \Iterator, \Countable, Sortable, Mixed, Se
      *
      * @return self
      */
-    public function setByReference(array &$array): self
+    public function setByReference(array &$array = null): self
     {
+        $array = $array ?? [];
         $this->content =& $array;
         $this->count();
         return $this;
@@ -478,25 +506,6 @@ class Arrays implements \ArrayAccess, \Iterator, \Countable, Sortable, Mixed, Se
     public static function isArrays($object): bool
     {
         return $object instanceof static;
-    }
-
-    /**
-     * Transform all properties of a object into an associative array
-     *
-     * @param  $object
-     *
-     * @return self
-     */
-    public static function fromObject($object): ?self
-    {
-        if (!is_object($object)) {
-            return null;
-        }
-
-        $vars = new static((array) $object);
-        return $vars->map(function($key, $value) {
-            return [preg_replace('/.*\0(.*)/', '\1', $key), $value];
-        });
     }
 
     /**

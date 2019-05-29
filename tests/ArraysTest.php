@@ -21,15 +21,22 @@ class ArraysTest extends TestCase
             public    $public = 'ipsum';
             protected $protected = 'dolor';
         };
-        $arrays = Arrays::fromObject($object);
+        $arrays = new Arrays($object);
         $expect = ['private' => 'lorem', 'public' => 'ipsum', 'protected' => 'dolor'];
         self::assertEquals($expect, $arrays->get());
     }
 
-    public function test_creating_from_invalid_object_should_return_null()
+    public function test_creating_from_arrays_instance()
     {
-        $arrays = Arrays::fromObject([1, 2, 3]);
-        self::assertNull($arrays);
+        $arrays1 = new Arrays([1, 2, 3]);
+        $arrays2 = new Arrays($arrays1);
+        self::assertSame([1, 2, 3], $arrays2->get());
+    }
+
+    public function test_creating_from_another_type_must_throws_exception()
+    {
+        self::expectException(\InvalidArgumentException::class);
+        $arrays = new Arrays('lorem');
     }
 
     public function test_method_set_passing_just_a_value()
@@ -58,41 +65,6 @@ class ArraysTest extends TestCase
         $arrays = new Arrays();
         $arrays->set('dolor', 'lorem.ipsum');
         self::assertSame(['lorem' => ['ipsum' => 'dolor']], $arrays->get());
-    }
-
-    public function test_accumulate_without_initializate()
-    {
-        $arrays = new Arrays();
-        $arrays['sum'] += 10;
-        self::assertEquals(10, $arrays['sum']);
-    }
-
-    public function test_subtract_without_initializate()
-    {
-        $arrays = new Arrays();
-        $arrays['sub'] -= 10;
-        self::assertEquals(-10, $arrays['sub']);
-    }
-
-    public function test_multiply_without_initializate()
-    {
-        $arrays = new Arrays();
-        $arrays['mult'] *= 10;
-        self::assertEquals(0, $arrays['mult']);
-    }
-
-    public function test_divide_without_initializate()
-    {
-        $arrays = new Arrays();
-        $arrays['div'] /= 10;
-        self::assertEquals(0, $arrays['div']);
-    }
-
-    public function test_concat_without_initializate()
-    {
-        $arrays = new Arrays();
-        $arrays['concat'] .= "Olá";
-        self::assertEquals('Olá', $arrays['concat']);
     }
 
     public function test_push_one_value()
@@ -203,7 +175,7 @@ class ArraysTest extends TestCase
     public function test_accessing_invalid_keys_should_return_null()
     {
         $arrays = new Arrays();
-        self::assertEquals(null, $arrays['ipsum']);
+        self::assertInstanceOf(Arrays::class, $arrays['ipsum']);
     }
 
     public function test_manipulating_values_using_dot_notation()
@@ -214,11 +186,14 @@ class ArraysTest extends TestCase
         $arrays['lorem.ipsum.dolor'][] = 'consectetur';
         $arrays['lorem.ipsum.dolor'][] = ['sit' => 'amet'];
         $arrays['lorem.ipsum'][] = $arrays['lorem.ipsum.dolor'];
+        $arrays['sit.amet'][0]['consectetur.dolor'] = [];
 
         $expect['lorem']['ipsum']['dolor']['sit'] = 'amet';
         $expect['lorem']['ipsum']['dolor'][] = 'consectetur';
         $expect['lorem']['ipsum']['dolor'][] = ['sit' => 'amet'];
         $expect['lorem']['ipsum'][] = $expect['lorem']['ipsum']['dolor'];
+        $expect['sit']['amet'][0]['consectetur']['dolor'] = [];
+
         
         self::assertEquals($expect, $arrays->get());
     }

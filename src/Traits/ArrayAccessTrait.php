@@ -2,7 +2,6 @@
 
 namespace Cajudev\Traits;
 
-use Cajudev\Strings;
 use Cajudev\Arrays;
 
 trait ArrayAccessTrait
@@ -24,19 +23,25 @@ trait ArrayAccessTrait
         if ($key === null) {
             $this->content[] = $value;
             $this->increment();
-        } elseif (preg_match('/^\w+$/', $key)) {
-            $this->incrementIfKeyNotExists($key);
-            $this->content[$key] = $value;
-        } elseif (preg_match_all('/(?<=\.|^)(?<key>\w+)(?=\.|$)/', $key, $keys)) {
-            $this->incrementIfKeyNotExists($keys['key'][0]);
-            $ret =& $this->content;
-            while (count($keys['key']) > 0) {
-                $ret =& $ret[array_shift($keys['key'])];
-            }
-            $ret = $value;
-        } else {
-            throw new \InvalidArgumentException('Wrong Pattern');
+            return;
         }
+        
+        if (preg_match(static::KEY_NOTATION, $key)) {
+            $this->increment(!array_key_exists($key, $this->content));
+            $this->content[$key] = $value;
+            return;
+        }
+        
+        if (!preg_match_all(static::DOT_NOTATION, $key, $keys)) {
+            throw new \InvalidArgumentException("Wrong Pattern {$key} is not a valid key");
+        }
+            
+        $this->increment(!array_key_exists($keys['key'][0], $this->content));
+        $ret =& $this->content;
+        while (count($keys['key']) > 0) {
+            $ret =& $ret[array_shift($keys['key'])];
+        }
+        $ret = $value;
     }
 
     /**
@@ -48,21 +53,22 @@ trait ArrayAccessTrait
      */
     public function offsetExists($key): bool
     {
-        if (preg_match('/^\w+$/', $key)) {
+        if (preg_match(static::KEY_NOTATION, $key)) {
             return isset($this->content[$key]);
-        } elseif (preg_match_all('/(?<=\.|^)(?<key>\w+)(?=\.|$)/', $key, $keys)) {
-            $ret =& $this->content;
-            while (count($keys['key']) > 0) {
-                $key = array_shift($keys['key']);
-                if (!isset($ret[$key])) {
-                    return false;
-                }
-                $ret =& $ret[$key];
-            }
-            return isset($ret);
-        } else {
-            throw new \InvalidArgumentException('Wrong Pattern');
+        } 
+        
+        if (!preg_match_all(static::DOT_NOTATION, $key, $keys)) {
+            throw new \InvalidArgumentException("Wrong Pattern {$key} is not a valid key");
         }
+
+        $ret =& $this->content;
+        while (count($keys['key']) > 0) {
+            if (!isset($keys['key'][0])) {
+                return false;
+            }
+            $ret =& $ret[array_shift($keys['key'])];
+        }
+        return isset($ret);
     }
 
     /**
@@ -74,22 +80,24 @@ trait ArrayAccessTrait
      */
     public function offsetUnset($key)
     {
-        if (preg_match('/^\w+$/', $key)) {
+        if (preg_match(static::KEY_NOTATION, $key)) {
             $this->decrement();
             unset($this->content[$key]);
-        } elseif (preg_match_all('/(?<=\.|^)(?<key>\w+)(?=\.|$)/', $key, $keys)) {
-            $ret =& $this->content;
-            while (count($keys['key']) > 1) {
-                $key = array_shift($keys['key']);
-                if (!isset($ret[$key])) {
-                    return false;
-                }
-                $ret =& $ret[$key];
-            }
-            unset($ret[$keys['key'][0]]);
-        } else {
-            throw new \InvalidArgumentException('Wrong Pattern');
+            return true;
         }
+        
+        if (!preg_match_all(static::DOT_NOTATION, $key, $keys)) {
+            throw new \InvalidArgumentException("Wrong Pattern {$key} is not a valid key");
+        }
+        
+        $ret =& $this->content;
+        while (count($keys['key']) > 1) {
+            if (!isset($ret[$keys['key'][0]])) {
+                return false;
+            }
+            $ret =& $ret[array_shift($keys['key'])];
+        }
+        unset($ret[$keys['key'][0]]);
     }
 
     /**
@@ -101,36 +109,42 @@ trait ArrayAccessTrait
      */
     public function &offsetGet($key)
     {
-        if (preg_match('/^\w+$/', $key)) {
-            $this->incrementIfKeyNotExists($key);
-            $ret =& $this->content[$key];
-        } elseif (preg_match_all('/(?<=\.|^)(?<key>\w+)(?=\.|$)/', $key, $keys)) {
-            $this->incrementIfKeyNotExists($keys['key'][0]);
+        $ret =& $this->offsetGetValue($key);
+        if (!(is_null($ret) || is_array($ret))) {
+            return $ret;
+        }
+        $return = (new static())->setByReference($ret);
+        return $return;
+    }
+
+    /**
+     * Auxiliary function of offsetGet
+     */
+    private function &offsetGetValue($key) {
+        if (preg_match(static::KEY_NOTATION, $key)) {
+            $this->increment(!array_key_exists($key, $this->content));
+            return $this->content[$key];
+        }
+        
+        if (preg_match_all(static::DOT_NOTATION, $key, $keys)) {
+            $this->increment(!array_key_exists($keys['key'][0], $this->content));
             $ret =& $this->content;
             while (count($keys['key']) > 0) {
                 $ret =& $ret[array_shift($keys['key'])];
             }
-        } elseif (preg_match('/^(?<start>\w+):(?<end>\w+)$/', $key, $result)) {
-            $start = $result['start'];
-            $end   = $result['end'];
-            $ret   = $start < $end 
-                   ? array_slice($this->content, $start, $end - $start + 1)
-                   : array_reverse(array_slice($this->content, $end, $start - $end + 1));
-        } else {
-            throw new \InvalidArgumentException('Wrong Pattern');
+            return $ret;
+        }
+        
+        if (!preg_match(static::INTERVAL_NOTATION, $key, $result)) {
+            throw new \InvalidArgumentException("Wrong Pattern {$key} is not a valid key");
         }
 
-        if (is_array($ret)) {
-            $return = (new static())->setByReference($ret);
-            return $return;
-        }
+        $start = $result['start'];
+        $end   = $result['end'];
+        $ret   = $start < $end 
+               ? array_slice($this->content, $start, $end - $start + 1)
+               : array_reverse(array_slice($this->content, $end, $start - $end + 1));
 
         return $ret;
-    }
-
-    public function incrementIfKeyNotExists($key) {
-        if (!array_key_exists($key, $this->content)) {
-            $this->increment();
-        };
     }
 }
