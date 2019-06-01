@@ -7,10 +7,9 @@ use Cajudev\Interfaces\Mixed;
 use Cajudev\Interfaces\Backup;
 use Cajudev\Interfaces\Sortable;
 
-class Arrays implements \ArrayAccess, \Iterator, \Countable, Sortable, Mixed, Set, Backup
+class Arrays implements \ArrayAccess, \Iterator, \Countable, Sortable, Set, Backup
 {
     use \Cajudev\Traits\SetTrait;
-    use \Cajudev\Traits\MixedTrait;
     use \Cajudev\Traits\BackupTrait;
     use \Cajudev\Traits\SortableTrait;
     use \Cajudev\Traits\IteratorTrait;

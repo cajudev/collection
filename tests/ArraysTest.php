@@ -659,48 +659,6 @@ class ArraysTest extends TestCase
         self::assertSame($expect, $arrays->get());
     }
 
-    public function test_is_int()
-    {
-        $arrays = new Arrays();
-        $arrays['number']['int'] = 10;
-        self::assertTrue($arrays->isInt('number.int'));
-    }
-
-    public function test_is_bool()
-    {
-        $arrays = new Arrays();
-        $arrays['bool'] = true;
-        self::assertTrue($arrays->isBool('bool'));
-    }
-
-    public function test_is_float()
-    {
-        $arrays = new Arrays();
-        $arrays['number']['float'] = 10.00;
-        self::assertTrue($arrays->isFloat('number.float'));
-    }
-
-    public function test_is_numeric()
-    {
-        $arrays = new Arrays();
-        $arrays['number'] = 0x0001;
-        self::assertTrue($arrays->isNumeric('number'));
-    }
-
-    public function test_is_string()
-    {
-        $arrays = new Arrays();
-        $arrays['string'] = 'lorem';
-        self::assertTrue($arrays->isString('string'));
-    }
-
-    public function test_is_array()
-    {
-        $arrays = new Arrays();
-        $arrays['array'] = [1, 2, 3];
-        self::assertTrue($arrays->isArray('array'));
-    }
-
     public function test_unique()
     {
         $arrays = new Arrays([1, 2, 3, 1, 2, 3, 1, 2, 3, 1, 2, 3]);
