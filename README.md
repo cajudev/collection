@@ -21,8 +21,4 @@ Leia a documentação completa em: https://cajudev.readthedocs.io/pt_BR/latest/a
 
 Para PHP 7.0  ``composer require cajudev/arrays "0.x.x"``
 
-Para PHP 7.1+ ``composer require cajudev/arrays "1.x.x"``
-
-## Contribuindo
-
-Faça um fork deste projeto e envie seus pull requests para averiguação. É necessário que todos os métodos sejam testados e passem pela análise do travis.
+Para PHP 7.3 ``composer require cajudev/arrays "1.x.x"``
