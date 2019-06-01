@@ -32,16 +32,29 @@ trait ArrayAccessTrait
             return;
         }
         
-        if (!preg_match_all(static::DOT_NOTATION, $key, $keys)) {
-            throw new \InvalidArgumentException("Wrong Pattern {$key} is not a valid key");
+        if (preg_match_all(static::DOT_NOTATION, $key, $keys)) {
+            $this->increment(!array_key_exists($keys['key'][0], $this->content));
+            $ret =& $this->content;
+            while (count($keys['key']) > 0) {
+                $ret =& $ret[array_shift($keys['key'])];
+            }
+            $ret = $value;
+            return;
         }
-            
-        $this->increment(!array_key_exists($keys['key'][0], $this->content));
-        $ret =& $this->content;
-        while (count($keys['key']) > 0) {
-            $ret =& $ret[array_shift($keys['key'])];
+
+        if (preg_match(static::INTERVAL_NOTATION, $key, $result)) {
+            $start = $result['start'];
+            $end   = $result['end'];
+            [$min, $max]  = $start < $end ? [$start, $end] : [$end, $start];
+
+            for ($i = $min; $i <= $max; $i++) {
+                $this->increment(!array_key_exists($i, $this->content));
+                $this->content[$i] = $value;
+            }
+            return;
         }
-        $ret = $value;
+
+        throw new \InvalidArgumentException("Wrong Pattern {$key} is not a valid key");
     }
 
     /**
@@ -57,18 +70,31 @@ trait ArrayAccessTrait
             return isset($this->content[$key]);
         } 
         
-        if (!preg_match_all(static::DOT_NOTATION, $key, $keys)) {
-            throw new \InvalidArgumentException("Wrong Pattern {$key} is not a valid key");
+        if (preg_match_all(static::DOT_NOTATION, $key, $keys)) {
+            $ret =& $this->content;
+            while (count($keys['key']) > 0) {
+                if (!isset($keys['key'][0])) {
+                    return false;
+                }
+                $ret =& $ret[array_shift($keys['key'])];
+            }
+            return isset($ret);
         }
 
-        $ret =& $this->content;
-        while (count($keys['key']) > 0) {
-            if (!isset($keys['key'][0])) {
-                return false;
+        if (preg_match(static::INTERVAL_NOTATION, $key, $result)) {
+            $start = $result['start'];
+            $end   = $result['end'];
+            [$min, $max]  = $start < $end ? [$start, $end] : [$end, $start];
+
+            for ($i = $min; $i <= $max; $i++) {
+                if(!isset($this->content[$i])) {
+                    return false;
+                }
             }
-            $ret =& $ret[array_shift($keys['key'])];
+            return true;
         }
-        return isset($ret);
+
+        throw new \InvalidArgumentException("Wrong Pattern {$key} is not a valid key");
     }
 
     /**
@@ -81,23 +107,38 @@ trait ArrayAccessTrait
     public function offsetUnset($key)
     {
         if (preg_match(static::KEY_NOTATION, $key)) {
-            $this->decrement();
+            $this->decrement(array_key_exists($key, $this->content));
             unset($this->content[$key]);
             return true;
         }
         
-        if (!preg_match_all(static::DOT_NOTATION, $key, $keys)) {
-            throw new \InvalidArgumentException("Wrong Pattern {$key} is not a valid key");
+        if (preg_match_all(static::DOT_NOTATION, $key, $keys)) {
+            $ret =& $this->content;
+            while (count($keys['key']) > 1) {
+                if (!isset($ret[$keys['key'][0]])) {
+                    return false;
+                }
+                $ret =& $ret[array_shift($keys['key'])];
+            }
+            unset($ret[$keys['key'][0]]);
+            return true;
+        }
+
+
+        if (preg_match(static::INTERVAL_NOTATION, $key, $result)) {
+            $start = $result['start'];
+            $end   = $result['end'];
+            [$min, $max]  = $start < $end ? [$start, $end] : [$end, $start];
+
+            for ($i = $min; $i <= $max; $i++) {
+                $this->decrement(array_key_exists($i, $this->content));
+                unset($this->content[$i]);
+            }
+            return true;
         }
         
-        $ret =& $this->content;
-        while (count($keys['key']) > 1) {
-            if (!isset($ret[$keys['key'][0]])) {
-                return false;
-            }
-            $ret =& $ret[array_shift($keys['key'])];
-        }
-        unset($ret[$keys['key'][0]]);
+
+        throw new \InvalidArgumentException("Wrong Pattern {$key} is not a valid key");
     }
 
     /**

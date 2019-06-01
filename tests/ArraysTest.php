@@ -203,6 +203,7 @@ class ArraysTest extends TestCase
         $arrays = new Arrays([0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10]);
         $expect = [2, 3, 4, 5, 6, 7];
         self::assertEquals($expect, $arrays['2:7']->get());
+        self::assertEquals($expect, $arrays->get('2:7')->get());
     }
 
     public function test_interval_notation_reverse_index_key()
@@ -210,6 +211,7 @@ class ArraysTest extends TestCase
         $arrays = new Arrays([0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10]);
         $expect = [7, 6, 5, 4, 3, 2];
         self::assertEquals($expect, $arrays['7:2']->get());
+        self::assertEquals($expect, $arrays->get('7:2')->get());
     }
 
     public function test_interval_notation_associative_key()
@@ -232,6 +234,41 @@ class ArraysTest extends TestCase
         ]);
         $expect = ['six' => 6, 'five' => 5, 'four' => 4, 'three' => 3, 'two' => 2];
         self::assertSame($expect, $arrays['6:2']->get());
+    }
+
+    public function test_interval_notation_insert_just_a_value()
+    {
+        $arrays = new Arrays();
+        $arrays['5:8'] = 0;
+        $expect = [5 => 0, 0, 0, 0];
+        self::assertEquals($expect, $arrays->get());
+    }
+
+    public function test_interval_notation_insert_reverse()
+    {
+        $arrays = new Arrays();
+        $arrays['8:5'] = 0;
+        $expect = [5 => 0, 0, 0, 0];
+        self::assertEquals($expect, $arrays->get());
+    }
+
+    public function test_interval_notation_isset_should_return_false()
+    {
+        $arrays = new Arrays([1 => 'a', 'b', 'c', 'd', 'e']);
+        self::assertTrue($arrays->isset('1:5'));
+    }
+
+    public function test_interval_notation_isset_should_return_true()
+    {
+        $arrays = new Arrays([1 => 'a', 'b', 'c', 'd', 'e']);
+        self::assertTrue($arrays->isset('1:5'));
+    }
+
+    public function test_interval_notation_unset_values()
+    {
+        $arrays = new Arrays([0, 1, 2, 3, 4, 5]);
+        $arrays->unset('2:4');
+        self::assertEquals([0, 1, 5 => 5], $arrays->get());
     }
 
     public function test_trying_access_using_wrong_pattern()
