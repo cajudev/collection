@@ -2,7 +2,6 @@
 
 use PHPUnit\Framework\TestCase;
 use Cajudev\Arrays;
-use Cajudev\Strings;
 
 class ArraysTest extends TestCase
 {
