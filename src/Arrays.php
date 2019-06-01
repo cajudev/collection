@@ -12,12 +12,12 @@ class Arrays implements \ArrayAccess, \IteratorAggregate, \Countable, Sortable, 
     use \Cajudev\Traits\SortableTrait;
     use \Cajudev\Traits\ArrayAccessTrait;
 
-    protected const BREAK    = 'break';
-    protected const CONTINUE = 'continue';
+    const BREAK    = 'break';
+    const CONTINUE = 'continue';
 
-    protected const KEY_NOTATION      = '/^\w+$/';
-    protected const DOT_NOTATION      = '/(?<=\.|^)(?<key>\w+)(?=\.|$)/';
-    protected const INTERVAL_NOTATION = '/^(?<start>\w+):(?<end>\w+)$/';
+    const KEY_NOTATION      = '/^\w+$/';
+    const DOT_NOTATION      = '/(?<=\.|^)(?<key>\w+)(?=\.|$)/';
+    const INTERVAL_NOTATION = '/^(?<start>\w+):(?<end>\w+)$/';
 
     protected $content;
     protected $length;
@@ -41,10 +41,14 @@ class Arrays implements \ArrayAccess, \IteratorAggregate, \Countable, Sortable, 
      *
      * @return array
      */
-    private function parseObject(object $object): array
+    private function parseObject($object): array
     {
         if ($object instanceof static) {
             return $object->get();
+        }
+
+        if (!is_object($object)) {
+            throw new \InvalidArgumentException('Argument must be an array or object');
         }
 
         $vars = (array) $object;
@@ -361,7 +365,7 @@ class Arrays implements \ArrayAccess, \IteratorAggregate, \Countable, Sortable, 
      *
      * @return self
      */
-    public function column($key, $index = null): ?self
+    public function column($key, $index = null): self
     {
         return new static(array_column($this->content, $key, $index));
     }
@@ -431,7 +435,9 @@ class Arrays implements \ArrayAccess, \IteratorAggregate, \Countable, Sortable, 
      */
     public function last()
     {
-        return $this->get(array_key_last($this->content));
+        $value = end($this->content);
+        reset($this->content);
+        return is_array($value) ? new static($value) : $value;
     }
 
     /**

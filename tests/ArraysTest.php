@@ -33,7 +33,7 @@ class ArraysTest extends TestCase
 
     public function test_creating_from_another_type_must_throws_exception()
     {
-        self::expectException(\TypeError::class);
+        self::expectException(\InvalidArgumentException::class);
         $arrays = new Arrays('lorem');
     }
 
