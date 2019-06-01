@@ -8,7 +8,6 @@ class ArraysTest extends TestCase
 {
     public function test_creating_object_from_array()
     {
-        $arrays = new Arrays(['lorem', 'ipsum', 'dolor' => ['sit' => 'amet']]);
         $regularArray = ['lorem', 'ipsum', 'dolor', 'sit', 'amet,', 'consectetur', 'adipiscing', 'elit'];
         $arrays = new Arrays($regularArray);
         self::assertEquals($regularArray, $arrays->get());
@@ -35,7 +34,7 @@ class ArraysTest extends TestCase
 
     public function test_creating_from_another_type_must_throws_exception()
     {
-        self::expectException(\InvalidArgumentException::class);
+        self::expectException(\TypeError::class);
         $arrays = new Arrays('lorem');
     }
 
@@ -57,7 +56,7 @@ class ArraysTest extends TestCase
     {
         $arrays = new Arrays();
         $arrays->set('dolor', 'lorem', 'ipsum');
-        self::assertSame(['lorem' => ['ipsum' => 'dolor']], $arrays->get());
+        self::assertSame(['lorem' => 'dolor', 'ipsum' => 'dolor'], $arrays->get());
     }
 
     public function test_method_set_using_dot_notation()
@@ -126,17 +125,11 @@ class ArraysTest extends TestCase
         self::assertEquals($expect, $arrays->get('lorem')->get('ipsum'));
     }
 
-    public function test_get_values_using_several_keys_argument()
+    public function test_get_several_values()
     {
-        $arrays = new Arrays([
-            'lorem' => [
-                'ipsum' => [
-                    'dolor' => 'sit'
-                ]
-            ]
-        ]);
-        $expect = 'sit';
-        self::assertEquals($expect, $arrays->get('lorem', 'ipsum', 'dolor'));
+        $arrays = new Arrays(['lorem' => 'ipsum', 'dolor' => 'sit']);
+        $expect = ['ipsum', 'sit', null];
+        self::assertEquals($expect, $arrays->get('lorem', 'dolor', 'amet'));
     }
 
     public function test_get_values_using_dot_notation()

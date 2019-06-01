@@ -4,16 +4,12 @@ namespace Cajudev;
 
 use Cajudev\Interfaces\Set;
 use Cajudev\Interfaces\Mixed;
-use Cajudev\Interfaces\Backup;
 use Cajudev\Interfaces\Sortable;
 
-class Arrays implements \ArrayAccess, \Iterator, \Countable, Sortable, Set, Backup
+class Arrays implements \ArrayAccess, \IteratorAggregate, \Countable, Sortable, Set
 {
     use \Cajudev\Traits\SetTrait;
-    use \Cajudev\Traits\BackupTrait;
     use \Cajudev\Traits\SortableTrait;
-    use \Cajudev\Traits\IteratorTrait;
-    use \Cajudev\Traits\CountableTrait;
     use \Cajudev\Traits\ArrayAccessTrait;
 
     protected const BREAK    = 'break';
@@ -24,7 +20,14 @@ class Arrays implements \ArrayAccess, \Iterator, \Countable, Sortable, Set, Back
     protected const INTERVAL_NOTATION = '/^(?<start>\w+):(?<end>\w+)$/';
 
     protected $content;
+    protected $length;
+    protected $backup;
 
+    /**
+     * @param  mixed $content
+     *
+     * @return void
+     */
     public function __construct($content = [])
     {
         $this->content = is_array($content) ? $content : $this->parseObject($content);
@@ -34,16 +37,12 @@ class Arrays implements \ArrayAccess, \Iterator, \Countable, Sortable, Set, Back
     /**
      * Transform all properties of a object into an associative array
      *
-     * @param  $object
+     * @param object $object
      *
-     * @return self
+     * @return array
      */
-    private function parseObject($object): array
+    private function parseObject(object $object): array
     {
-        if (!is_object($object)) {
-            throw new \InvalidArgumentException('Argument must be an array or object');
-        }
-
         if ($object instanceof static) {
             return $object->get();
         }
@@ -67,6 +66,29 @@ class Arrays implements \ArrayAccess, \Iterator, \Countable, Sortable, Set, Back
         $this->content =& $array;
         $this->count();
         return $this;
+    }
+
+    /**
+     * Count all elements of the array
+     * 
+     * @param int $mode
+     *
+     * @return int
+     */
+    public function count(int $mode = COUNT_NORMAL): int
+    {
+        $this->length = count($this->content, $mode);
+        return $this->length;
+    }
+
+    /**
+     * Return the object iterator
+     *
+     * @return ArrayIterator
+     */
+    public function getIterator()
+    {
+        return new \ArrayIterator($this->content);
     }
 
     /**
@@ -102,11 +124,11 @@ class Arrays implements \ArrayAccess, \Iterator, \Countable, Sortable, Set, Back
      *
      * @param  int     $i
      * @param  int     $add
-     * @param  Closure $function
+     * @param  callable $function
      *
      * @return void
      */
-    public function for(int $i, int $add, \Closure $function)
+    public function for(int $i, int $add, callable $function)
     {
         $keys   = array_keys($this->content);
         $count  = count($this->content);
@@ -123,11 +145,11 @@ class Arrays implements \ArrayAccess, \Iterator, \Countable, Sortable, Set, Back
     /**
      * Perform a foreach loop
      *
-     * @param  Closure $function
+     * @param  callable $function
      *
      * @return void
      */
-    public function each(\Closure $function)
+    public function each(callable $function)
     {
         foreach ($this->content as $key => $value) {
             $return = $function($key, $value);
@@ -150,8 +172,10 @@ class Arrays implements \ArrayAccess, \Iterator, \Countable, Sortable, Set, Back
 
     /**
      * Check if the value exist in the array
+     * 
+     * @param mixed $value
      *
-     * @return mixed
+     * @return bool
      */
     public function contains($value): bool
     {
@@ -407,9 +431,7 @@ class Arrays implements \ArrayAccess, \Iterator, \Countable, Sortable, Set, Back
      */
     public function last()
     {
-        $return = $this->end();
-        $this->rewind();
-        return $return;
+        return $this->get(array_key_last($this->content));
     }
 
     /**
@@ -443,14 +465,25 @@ class Arrays implements \ArrayAccess, \Iterator, \Countable, Sortable, Set, Back
      */
     public function get(...$keys)
     {
-        if (!$keys) {
+        $count = count($keys);
+
+        if ($count === 0) {
             return $this->content;
         }
-        return $this[implode('.', $keys)] ?? null;
+
+        if ($count === 1) {
+            return $this[$keys[0]] ?? null;
+        }
+
+        $return = [];
+        foreach ($keys as $key) {
+            $return[] = $this[$key] ?? null;
+        }
+        return $return;
     }
 
     /**
-     * Insert a value in a associated key
+     * Insert a value in a associated key or keys
      *
      * @param  mixed $keys
      *
@@ -458,12 +491,39 @@ class Arrays implements \ArrayAccess, \Iterator, \Countable, Sortable, Set, Back
      */
     public function set($value, ...$keys)
     {
-        if (!$keys) {
+        $count = count($keys);
+
+        if ($count === 0) {
             $this[] = $value;
-        } else {
-            $this[implode('.', $keys)] = $value;
+            return $this;
         }
+
+        if ($count === 1) {
+            $this[$keys[0]] = $value;
+            return $this;
+        }
+
+        foreach ($keys as $key) {
+            $this[$key] = $value;
+        }
+
         return $this;
+    }
+
+    /**
+     * Create a backup of the content of array
+     */   
+    public function backup() {
+        $this->backup = $this->content;
+    }
+
+    /**
+     * Restore the data of the array
+     */
+    public function restore() {
+        $this->content = $this->backup;
+        $this->backup  = null;
+        $this->count();
     }
 
     /**
@@ -492,7 +552,7 @@ class Arrays implements \ArrayAccess, \Iterator, \Countable, Sortable, Set, Back
 
     public function __toString()
     {
-        return json_encode($this->get(), JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE);
+        return json_encode($this->content, JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE);
     }
 
     /**
