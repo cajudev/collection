@@ -37,25 +37,11 @@ class ArraysTest extends TestCase
         $arrays = new Arrays('lorem');
     }
 
-    public function test_set_with_only_value()
-    {
-        $arrays = new Arrays();
-        $arrays->set('lorem');
-        self::assertSame(['lorem'], $arrays->get());
-    }
-
     public function test_set_with_value_and_key()
     {
         $arrays = new Arrays();
-        $arrays->set('lorem', 'ipsum');
-        self::assertSame(['ipsum' => 'lorem'], $arrays->get());
-    }
-
-    public function test_set_with_more_then_one_key()
-    {
-        $arrays = new Arrays();
-        $arrays->set('dolor', 'lorem', 'ipsum');
-        self::assertSame(['lorem' => 'dolor', 'ipsum' => 'dolor'], $arrays->get());
+        $arrays->set('ipsum', 'lorem');
+        self::assertSame(['lorem' => 'ipsum'], $arrays->get());
     }
 
     public function test_set_using_dot_notation()
@@ -67,7 +53,7 @@ class ArraysTest extends TestCase
 
     public function test_length_after_set() {
         $arrays = new Arrays();
-        $arrays->set('lorem');
+        $arrays->set('lorem', 'ipsum');
         self::assertSame(1, $arrays->length);
     }
 
@@ -114,8 +100,8 @@ class ArraysTest extends TestCase
     public function test_shift_value_from_array()
     {
         $arrays = new Arrays(['lorem', 'ipsum', 'dolor']);
-        $expect = ['ipsum', 'dolor'];
-        self::assertEquals($expect, $arrays->shift()->get());
+        self::assertEquals('lorem', $arrays->shift());
+        self::assertEquals(['ipsum', 'dolor'], $arrays->get());
     }
 
     public function test_length_after_shift() {
@@ -127,9 +113,8 @@ class ArraysTest extends TestCase
     public function test_pop_value_from_array()
     {
         $arrays = new Arrays(['lorem', 'ipsum', 'dolor']);
-        $arrays->pop();
-        $expect = ['lorem', 'ipsum'];
-        self::assertEquals($expect, $arrays->get());
+        self::assertEquals('dolor', $arrays->pop());
+        self::assertEquals(['lorem', 'ipsum'], $arrays->get());
     }
 
     public function test_length_after_pop() {
@@ -161,11 +146,8 @@ class ArraysTest extends TestCase
     {
         $arrays = new Arrays(['lorem' => 'ipsum', 'dolor' => 'sit']);
         $expect = [
-            'ipsum',
             'lorem' => 'ipsum',
-            'sit',
             'dolor' => 'sit',
-             null,
             'amet'  => null,
         ];
         self::assertEquals($expect, $arrays->get('lorem', 'dolor', 'amet')->get());
@@ -241,9 +223,7 @@ class ArraysTest extends TestCase
         $arrays['lorem']['ipsum']['sit'] = 'dolor';
 
         $expect = [
-            'amet',
             'dolor' => 'amet',
-            'dolor',
             'sit' => 'dolor',
         ];
         
@@ -671,15 +651,16 @@ class ArraysTest extends TestCase
         self::assertEquals(5, $arrays->last());
     }
 
-    public function test_keyCase()
+    public function test_lower_case()
     {
-        $arrays = new Arrays(['Hello' => 5]);
-        
-        $arrays->lower();
-        self::assertEquals(['hello' => 5], $arrays->get());
+        $arrays = new Arrays(['Lorem' => ['Ipsum' => 'consectetur'], 'Dolor' => ['Amet' => 'elit']]);
+        self::assertEquals(['lorem' => ['ipsum' => 'consectetur'], 'dolor' => ['amet' => 'elit']], $arrays->lower()->get());
+    }
 
-        $arrays->upper();
-        self::assertEquals(['HELLO' => 5], $arrays->get());
+    public function test_upper_case()
+    {
+        $arrays = new Arrays(['Lorem' => ['Ipsum' => 'consectetur'], 'Dolor' => ['Amet' => 'elit']]);
+        self::assertEquals(['LOREM' => ['IPSUM' => 'consectetur'], 'DOLOR' => ['AMET' => 'elit']], $arrays->upper()->get());
     }
 
     public function test_toString()
