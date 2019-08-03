@@ -2,7 +2,7 @@
 
 namespace Cajudev\Traits;
 
-use Cajudev\Arrays;
+use Cajudev\Collection;
 
 trait SortableTrait
 {

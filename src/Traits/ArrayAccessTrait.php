@@ -2,7 +2,7 @@
 
 namespace Cajudev\Traits;
 
-use Cajudev\Arrays;
+use Cajudev\Collection;
 
 trait ArrayAccessTrait
 {
@@ -16,7 +16,7 @@ trait ArrayAccessTrait
      */
     public function offsetSet($key, $value)
     {
-        if (Arrays::isArrays($value)) {
+        if (Collection::isCollection($value)) {
             $value = $value->get();
         }
 

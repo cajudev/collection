@@ -1,5 +1,5 @@
 {
-    "name": "cajudev/arrays",
+    "name": "cajudev/collection",
     "description": "Making php more object oriented.",
     "keywords": [
         "object oriented",
@@ -9,7 +9,7 @@
         "php"
     ],
     "license": "MIT",
-    "homepage": "https://github.com/cajudev/arrays",
+    "homepage": "https://github.com/cajudev/collection",
     "type": "library",
     "authors": [
         {

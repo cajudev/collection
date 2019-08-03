@@ -11,9 +11,7 @@ trait SetTrait
      */
     public function union(): self
     {
-        $this->content = $this->merge()->unique()->get();
-        $this->count();
-        return $this;
+        return $this->merge()->unique();
     }
 
     /**
@@ -23,9 +21,7 @@ trait SetTrait
      */
     public function diff(): self
     {   
-        $this->content = $this->reduce('array_diff')->get();
-        $this->count();
-        return $this;
+        return $this->reduce('array_diff');
     }
 
     /**
@@ -35,9 +31,7 @@ trait SetTrait
      */
     public function intersect(): self
     {
-        $this->content = $this->reduce('array_intersect')->get();
-        $this->count();
-        return $this;
+        return $this->reduce('array_intersect');
     }
 
     /**
@@ -47,19 +41,17 @@ trait SetTrait
      */
     public function cartesian(): self
     {
-        $result = [[]];
+        $cartesian = [[]];
         foreach ($this->content as $key => $values) {
             $append = [];
-            foreach ($result as $product) {
+            foreach ($cartesian as $product) {
                 foreach ($values as $item) {
                     $product[$key] = $item;
                     $append[] = $product;
                 }
             }
-            $result = $append;
+            $cartesian = $append;
         }
-        $this->content = $result;
-        $this->count();
-        return $this;
+        return new static($cartesian);
     }
 }

@@ -2,18 +2,18 @@
 
 namespace Cajudev;
 
+use Cajudev\ObjectParser;
+use Cajudev\CollectionIterator;
+
 use Cajudev\Interfaces\Set;
 use Cajudev\Interfaces\Mixed;
 use Cajudev\Interfaces\Sortable;
 
-class Arrays implements \ArrayAccess, \IteratorAggregate, \Countable, Sortable, Set
+class Collection implements \ArrayAccess, \IteratorAggregate, \Countable, Sortable, Set
 {
     use \Cajudev\Traits\SetTrait;
     use \Cajudev\Traits\SortableTrait;
     use \Cajudev\Traits\ArrayAccessTrait;
-
-    const BREAK    = 'break';
-    const CONTINUE = 'continue';
 
     const KEY_NOTATION      = '/^[^.:]+$/';
     const DOT_NOTATION      = '/(?<=\.|^)(?<key>[^.:]+)(?=\.|$)/';
@@ -21,7 +21,6 @@ class Arrays implements \ArrayAccess, \IteratorAggregate, \Countable, Sortable, 
 
     protected $content;
     protected $length;
-    protected $backup;
 
     /**
      * @param  mixed $content
@@ -30,31 +29,8 @@ class Arrays implements \ArrayAccess, \IteratorAggregate, \Countable, Sortable, 
      */
     public function __construct($content = [])
     {
-        $this->content = is_array($content) ? $content : $this->parseObject($content);
+        $this->content = is_array($content) ? $content : (new ObjectParser($content))->parse();
         $this->count();
-    }
-
-    /**
-     * Transform all properties of a object into an associative array
-     *
-     * @param object $object
-     *
-     * @return array
-     */
-    private function parseObject($object): array
-    {
-        if ($object instanceof static) {
-            return $object->get();
-        }
-
-        if (!is_object($object)) {
-            throw new \InvalidArgumentException('Invalid source type [' . gettype($object) . ']');
-        }
-
-        $vars = (array) $object;
-        return array_column(array_map(function($key, $value) {
-            return [preg_replace('/.*\0(.*)/', '\1', $key), $value];
-        }, array_keys($vars), $vars), 1, 0);
     }
 
     /**
@@ -73,7 +49,7 @@ class Arrays implements \ArrayAccess, \IteratorAggregate, \Countable, Sortable, 
     }
 
     /**
-     * Count all elements of the array
+     * Count all elements of the collection
      * 
      * @param int $mode
      *
@@ -92,15 +68,15 @@ class Arrays implements \ArrayAccess, \IteratorAggregate, \Countable, Sortable, 
     /**
      * Return the object iterator
      *
-     * @return ArrayIterator
+     * @return CollectionIterator
      */
     public function getIterator()
     {
-        return new \ArrayIterator($this->content);
+        return new CollectionIterator($this->content);
     }
 
     /**
-     * Insert the values on the beginning of the array
+     * Insert the values on the beginning of the collection
      *
      * @param  mixed $values
      *
@@ -114,7 +90,7 @@ class Arrays implements \ArrayAccess, \IteratorAggregate, \Countable, Sortable, 
     }
 
     /**
-     * Insert the values on the final of the array
+     * Insert the values on the final of the collection
      *
      * @param  mixed $values
      *
@@ -132,44 +108,36 @@ class Arrays implements \ArrayAccess, \IteratorAggregate, \Countable, Sortable, 
      *
      * @param  int     $i
      * @param  int     $add
-     * @param  callable $function
+     * @param  callable $callback
      *
      * @return void
      */
-    public function for(int $i, int $add, callable $function)
+    public function for(int $i, int $add, callable $callback)
     {
         $keys   = array_keys($this->content);
         $count  = count($this->content);
 
         for ($i; ($add >= 0 ? $i < $count : $i >= 0); $i += $add) {
-            $return = $function($keys[$i], $this->content[$keys[$i]]);
-            switch ($return) {
-                case self::BREAK: break 2;
-                case self::CONTINUE; continue 2;
-            }
+            $callback($keys[$i], $this->content[$keys[$i]]);
         }
     }
 
     /**
      * Perform a foreach loop
      *
-     * @param  callable $function
+     * @param  callable $callback
      *
      * @return void
      */
-    public function each(callable $function)
+    public function each(callable $callback)
     {
         foreach ($this->content as $key => $value) {
-            $return = $function($key, $value);
-            switch ($return) {
-                case self::BREAK: break 2;
-                case self::CONTINUE; continue 2;
-            }
+            $callback($key, $value);
         }
     }
 
     /**
-     * Sum all values in the array
+     * Sum all values in the collection
      *
      * @return mixed
      */
@@ -179,7 +147,7 @@ class Arrays implements \ArrayAccess, \IteratorAggregate, \Countable, Sortable, 
     }
 
     /**
-     * Check if the value exist in the array
+     * Check if the value exist in the collection
      * 
      * @param mixed $value
      *
@@ -193,43 +161,50 @@ class Arrays implements \ArrayAccess, \IteratorAggregate, \Countable, Sortable, 
     /**
      * Applies the callback to all elements
      *
-     * @param  callable $handle
+     * @param  callable $callback
      *
      * @return self
      */
-    public function map(callable $handle): self
+    public function map(callable $callback): self
     {
-        $keys = array_keys($this->content);
-        $this->content = array_column(array_map($handle, $keys, $this->content), 1, 0);
-        return $this;
+        $keys   = array_keys($this->content);
+        $result = array_map($callback, $keys, $this->content);
+        return $this->return(array_reduce($result, function($a, $b) {
+            return (array) $a + (array) $b;
+        }));
     }
 
     /**
-     * Filter the array using a callable function
+     * Filter the collection using a callable function
      *
-     * @param  callable $handle
+     * @param  callable $callback
      *
      * @return self
      */
-    public function filter(callable $handle): self
+    public function filter(callable $callback): self
     {
-        $this->content = array_filter($this->content, $handle, ARRAY_FILTER_USE_BOTH);
-        $this->count();
-        return $this;
+        $filter = [];
+        // array_filter is not used as for the order of the arguments differs from others methods
+        foreach ($this->content as $key => $value) {
+            if ($callback($key, $value)) {
+                $filter[$key] = $value;
+            }
+        }
+        return $this->return($filter);
     }
 
     /**
-     * Reduce the array to a single value
+     * Reduce the collection to a single value
      *
-     * @param  callable $handle
+     * @param  callable $callback
      *
      * @return self
      */
-    public function reduce(callable $handle)
+    public function reduce(callable $callback)
     {
         $content = $this->content;
         $initial = array_shift($content);
-        $result  = array_reduce($content, $handle, $initial);
+        $result  = array_reduce($content, $callback, $initial);
         return $this->return($result);
     }
 
@@ -258,7 +233,7 @@ class Arrays implements \ArrayAccess, \IteratorAggregate, \Countable, Sortable, 
     }
 
     /**
-     * Determine wheter a variable is empty
+     * Determine wheter a position in collection is empty
      *
      * @param  mixed $key
      *
@@ -270,7 +245,7 @@ class Arrays implements \ArrayAccess, \IteratorAggregate, \Countable, Sortable, 
     }
 
     /**
-     * Determine wheter a variable is not empty
+     * Determine wheter a position in collection is not empty
      *
      * @param  mixed $key
      *
@@ -282,7 +257,7 @@ class Arrays implements \ArrayAccess, \IteratorAggregate, \Countable, Sortable, 
     }
 
     /**
-     * Unset a given variable
+     * Unset a given position of the collection
      *
      * @param  mixed $key
      *
@@ -294,7 +269,7 @@ class Arrays implements \ArrayAccess, \IteratorAggregate, \Countable, Sortable, 
     }
 
     /**
-     * Remove the first element from an array, and return the removed value
+     * Remove the first element from the collection, and return the removed value
      *
      * @return mixed
      */
@@ -306,7 +281,7 @@ class Arrays implements \ArrayAccess, \IteratorAggregate, \Countable, Sortable, 
     }
 
     /**
-     * Remove the last element from an array, and return the removed value
+     * Remove the last element from the collection, and return the removed value
      *
      * @return mixed
      */
@@ -318,7 +293,7 @@ class Arrays implements \ArrayAccess, \IteratorAggregate, \Countable, Sortable, 
     }
 
     /**
-     * Join array elements into string
+     * Join collection's elements into string
      *
      * @return string
      */
@@ -334,28 +309,27 @@ class Arrays implements \ArrayAccess, \IteratorAggregate, \Countable, Sortable, 
      */
     public function flip(): self
     {
-        $this->content = array_flip($this->content);
-        return $this;
+        return $this->return(array_flip($this->content));
     }
 
     /**
-     * Return a object with all the keys of the array
+     * Return a object with all the keys of the collection
      *
      * @return self
      */
     public function keys(): self
     {
-        return new static(array_keys($this->content));
+        return $this->return(array_keys($this->content));
     }
 
     /**
-     * Return a object with all the values of the array
+     * Return a object with all the values of the collection
      *
      * @return self
      */
     public function values(): self
     {
-        return new static(array_values($this->content));
+        return $this->return(array_values($this->content));
     }
 
     /**
@@ -366,13 +340,13 @@ class Arrays implements \ArrayAccess, \IteratorAggregate, \Countable, Sortable, 
      *
      * @return self
      */
-    public function column($key, $index = null): self
+    public function column($key, $index = null)
     {
-        return new static(array_column($this->content, $key, $index));
+        return $this->return(array_column($this->content, $key, $index));
     }
     
     /**
-     * Split the array into chunks
+     * Split the collection into parts
      *
      * @param  int $size
      * @param  bool $preserve_keys
@@ -381,9 +355,7 @@ class Arrays implements \ArrayAccess, \IteratorAggregate, \Countable, Sortable, 
      */
     public function chunk(int $size, bool $preserve_keys = false): self
     {
-        $this->content = array_chunk($this->content, $size, $preserve_keys);
-        $this->count();
-        return $this;
+        return $this->return(array_chunk($this->content, $size, $preserve_keys));
     }
 
     /**
@@ -391,38 +363,33 @@ class Arrays implements \ArrayAccess, \IteratorAggregate, \Countable, Sortable, 
      *
      * @return self
      */
-    public function unique(): self
+    public function unique(int $flags = SORT_STRING): self
     {
-        $this->content = array_unique($this->content);
-        $this->count();
-        return $this;
+        return $this->return(array_unique($this->content, $flags));
     }
 
     /**
-     * Merge all sublevels of the array into one
+     * Merge all sublevels of the collection into one
      *
      * @return self
      */
     public function merge(): self
     {
-        $this->content = $this->reduce('array_merge')->get();
-        $this->count();
-        return $this;
+        return $this->reduce('array_merge');
     }
 
     /**
-     * Reverse the order of the array
+     * Reverse the order of the collection
      *
      * @return self
      */
     public function reverse($preserve_keys = null): self
     {
-        $this->content = array_reverse($this->content, $preserve_keys);
-        return $this;
+        return $this->return(array_reverse($this->content, $preserve_keys));
     }
 
     /**
-     * Return a key from a value in array if it exists
+     * Return a key from a value in collection if it exists
      */
     public function search($value, bool $strict = null)
     {
@@ -430,7 +397,7 @@ class Arrays implements \ArrayAccess, \IteratorAggregate, \Countable, Sortable, 
     }
 
     /**
-     * Return the last element of the array
+     * Return the last element of the collection
      *
      * @return void
      */
@@ -442,7 +409,7 @@ class Arrays implements \ArrayAccess, \IteratorAggregate, \Countable, Sortable, 
     }
 
     /**
-     * Change the case of all keys in the array to lower case
+     * Change the case of all keys in the collection to lower case
      *
      * @return self
      */
@@ -458,7 +425,7 @@ class Arrays implements \ArrayAccess, \IteratorAggregate, \Countable, Sortable, 
     }
 
     /**
-     * Change the case of all keys in the array to upper case
+     * Change the case of all keys in the collection to upper case
      *
      * @return self
      */
@@ -492,13 +459,9 @@ class Arrays implements \ArrayAccess, \IteratorAggregate, \Countable, Sortable, 
             return $this[$keys[0]] ?? null;
         }
 
-        $last = function($key) {
-            return array_slice(explode('.', $key), -1, 1)[0];
-        };
-
         $return = new static();
         foreach ($keys as $key) {
-            $return[$last($key)] = $this[$key] ?? null;
+            $return[$key] = $this[$key] ?? null;
         }
         return $return;
     }
@@ -511,26 +474,10 @@ class Arrays implements \ArrayAccess, \IteratorAggregate, \Countable, Sortable, 
      *
      * @return mixed
      */
-    public function set($value, string $key)
+    public function set(string $key, $value)
     {
         $this[$key] = $value;
         return $this;
-    }
-
-    /**
-     * Create a backup of the content of array
-     */   
-    public function backup() {
-        $this->backup = $this->content;
-    }
-
-    /**
-     * Restore the data of the array
-     */
-    public function restore() {
-        $this->content = $this->backup;
-        $this->backup  = null;
-        $this->count();
     }
 
     /**
@@ -538,7 +485,7 @@ class Arrays implements \ArrayAccess, \IteratorAggregate, \Countable, Sortable, 
      *
      * @return mixed
      */
-    private function return($content) {
+    protected function return($content) {
         return is_array($content) ? new static($content) : $content;
     }
 
@@ -596,19 +543,19 @@ class Arrays implements \ArrayAccess, \IteratorAggregate, \Countable, Sortable, 
     // ================================================================= //
 
     /**
-     * Verify whether a element is an Arrays object
+     * Verify whether a element is an Collection object
      *
-     * @param  mixed $array
+     * @param  mixed $object
      *
      * @return bool
     */
-    public static function isArrays($object): bool
+    public static function isCollection($object): bool
     {
         return $object instanceof static;
     }
 
     /**
-     * Combine two arrays, using the first for keys and the second for values
+     * Combine two collections, using the first for keys and the second for values
      *
      * @param  mixed $keys
      * @param  mixed $values

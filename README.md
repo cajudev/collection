@@ -1,16 +1,16 @@
-# Bem vindo ao Arrays
+# Bem vindo ao Collection
 
-[![](https://img.shields.io/packagist/v/cajudev/arrays.svg)](https://packagist.org/packages/cajudev/arrays)
-[![](https://img.shields.io/packagist/dt/cajudev/arrays.svg)](https://packagist.org/packages/cajudev/arrays)
-[![](https://img.shields.io/github/license/cajudev/arrays.svg)](https://raw.githubusercontent.com/cajudev/arrays/master/LICENSE)
-[![](https://img.shields.io/travis/cajudev/arrays.svg)](https://travis-ci.org/cajudev/arrays)
-[![](https://coveralls.io/repos/github/cajudev/arrays/badge.svg?branch=master)](https://coveralls.io/github/cajudev/arrays)
-[![](https://img.shields.io/github/issues/cajudev/arrays.svg)](https://github.com/cajudev/arrays/issues)
-[![](https://img.shields.io/github/contributors/cajudev/arrays.svg)](https://github.com/cajudev/arrays/graphs/contributors)
+[![](https://img.shields.io/packagist/v/cajudev/collection.svg)](https://packagist.org/packages/cajudev/collection)
+[![](https://img.shields.io/packagist/dt/cajudev/collection.svg)](https://packagist.org/packages/cajudev/collection)
+[![](https://img.shields.io/github/license/cajudev/collection.svg)](https://raw.githubusercontent.com/cajudev/collection/master/LICENSE)
+[![](https://img.shields.io/travis/cajudev/collection.svg)](https://travis-ci.org/cajudev/collection)
+[![](https://coveralls.io/repos/github/cajudev/collection/badge.svg?branch=master)](https://coveralls.io/github/cajudev/collection)
+[![](https://img.shields.io/github/issues/cajudev/collection.svg)](https://github.com/cajudev/collection/issues)
+[![](https://img.shields.io/github/contributors/cajudev/collection.svg)](https://github.com/cajudev/collection/graphs/contributors)
 
 Uma maneira de escrever códigos em php de maneira mais orientada à objetos
 
-Leia a documentação completa em: https://cajudev.readthedocs.io/pt_BR/latest/arrays
+Leia a documentação completa em: https://cajudev.readthedocs.io/pt_BR/latest/collection
 
 ## Características
 
@@ -19,8 +19,6 @@ Leia a documentação completa em: https://cajudev.readthedocs.io/pt_BR/latest/a
 
 ## Instalação
 
-PHP 7.3+ ``composer require cajudev/arrays "^2"``
+PHP 7.3+ ``composer require cajudev/collection "^3"``
 
-PHP 7.0 ``composer require cajudev/arrays "^1"``
-
-PHP 5.6 ``composer require cajudev/arrays "^0"``
+PHP 7.0 ``composer require cajudev/collection "^2"``
