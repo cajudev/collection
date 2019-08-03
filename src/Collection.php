@@ -72,7 +72,7 @@ class Collection implements \ArrayAccess, \IteratorAggregate, \Countable, Sortab
      */
     public function getIterator()
     {
-        return new CollectionIterator($this->content);
+        return new CollectionIterator($this);
     }
 
     /**
