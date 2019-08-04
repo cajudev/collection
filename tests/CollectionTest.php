@@ -44,6 +44,14 @@ class CollectionTest extends TestCase
         self::assertSame(['lorem' => 'ipsum'], $collection->get());
     }
 
+    public function test_set_another_collection_should_insert_array()
+    {
+        $collection = new Collection();
+        $collection->set('lorem', new Collection([1, 2, 3]));
+        $array = $collection->get();
+        self::assertEquals([1, 2, 3], $array['lorem']);
+    }
+
     public function test_set_using_dot_notation()
     {
         $collection = new Collection();
@@ -650,10 +658,16 @@ class CollectionTest extends TestCase
         self::assertEquals(3, $collection->length);
     }
 
-    public function test_last()
+    public function test_first_should_return_the_first_element()
     {
-        $collection = new Collection([1, 2, 3, 4, 5]);
-        self::assertEquals(5, $collection->last());
+        $collection = new Collection(['lorem' => 'ipsum', 'dolor' => 'sit', 'amet' => 'consectetur']);
+        self::assertEquals('ipsum', $collection->first());
+    }
+
+    public function test_last_should_return_the_last_element()
+    {
+        $collection = new Collection(['lorem' => 'ipsum', 'dolor' => 'sit', 'amet' => 'consectetur']);
+        self::assertEquals('consectetur', $collection->last());
     }
 
     public function test_lower_case()
@@ -862,5 +876,56 @@ class CollectionTest extends TestCase
         self::expectException(InvalidArgumentException::class);
         $collection = new Collection();
         $collection->length = 10;
+    }
+
+    public function test_coalesce_should_return_first_non_null_value() {
+        $collection = new Collection([null, null, null, 'lorem', null]);
+        self::assertEquals('lorem', $collection->coalesce());
+    }
+
+    public function test_coalesce_should_return_null_when_all_values_are_null() {
+        $collection = new Collection([null, null, null, null, null]);
+        self::assertEquals(null, $collection->coalesce());
+    }
+
+    public function test_outer_should_return_full_diff() {
+        $collection = new Collection([[1, 2, 3, 4, 5], [2, 5, 7, 9]]);
+        $expect     = new Collection([[1, 3, 4], [7, 9]]);
+        self::assertEquals($expect, $collection->outer());
+    }
+
+    public function test_range_should_return_number_list() {
+        $collection = Collection::range(1, 10, 2);
+        self::assertEquals([1, 3, 5, 7, 9], $collection->get());
+    }
+
+    public function test_range_should_return_alphabet_interval() {
+        $collection = Collection::range('A', 'F');
+        self::assertEquals(['A', 'B', 'C', 'D', 'E', 'F'], $collection->get());
+    }
+
+    public function test_random_should_return_random_element() {
+        $collection = Collection::range('A', 'F');
+        self::assertContains($collection->random(), ['A', 'B', 'C', 'D', 'E', 'F']);
+    }
+
+    public function test_walk_should_iterate_all_elements() {
+        $collection = new Collection([1, [2, 3, 4], [[5, 6, 7], [8, 9]], [10, 11, 12], 13]);
+        $i = 1;
+        $collection->walk(function($key, $value) use (&$i) {
+            self::assertEquals($i++, $value);
+        });
+    }
+
+    public function test_shuffle_should_mix_elements() {
+        $range = Collection::range('A', 'C');
+
+        $collection = new Collection();
+        $collection['0:2'] = $range;
+
+        $cartesian = $collection->cartesian();
+        $shuffle   = $range->shuffle();
+
+        self::assertTrue($cartesian->contains($shuffle));
     }
 }

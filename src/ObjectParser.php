@@ -11,7 +11,7 @@ class ObjectParser implements Parser
 
     public function __construct($object) {
         if (!is_object($object)) {
-            throw new \InvalidArgumentException("Invalid argument {$object}(" . gettype($object) . ')');
+            throw new \InvalidArgumentException('Invalid argument received');
         }
         $this->object = $object;
     }

@@ -25,6 +25,19 @@ trait SetTrait
     }
 
     /**
+     * Perform a full difference of sets
+     * 
+     * @return self
+     */
+    public function outer(): self
+    {   
+        return $this->return([
+            $this->diff()->values()->get(),
+            $this->reverse()->diff()->values()->get(),
+        ]);
+    }
+
+    /**
      * Perform a intersection of sets
      * 
      * @return self
@@ -52,6 +65,6 @@ trait SetTrait
             }
             $cartesian = $append;
         }
-        return new static($cartesian);
+        return $this->return($cartesian);
     }
 }

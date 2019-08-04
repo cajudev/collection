@@ -84,7 +84,7 @@ class Collection implements \ArrayAccess, \IteratorAggregate, \Countable, Sortab
      */
     public function unshift(...$values): self
     {
-        array_unshift($this->content, ...$values);
+        array_unshift($this->content, ...static::checkAll($values));
         $this->increment(count($values));
         return $this;
     }
@@ -98,7 +98,7 @@ class Collection implements \ArrayAccess, \IteratorAggregate, \Countable, Sortab
      */
     public function push(...$values): self
     {
-        array_push($this->content, ...$values);
+        array_push($this->content, ...static::checkAll($values));
         $this->increment(count($values));
         return $this;
     }
@@ -137,6 +137,21 @@ class Collection implements \ArrayAccess, \IteratorAggregate, \Countable, Sortab
     }
 
     /**
+     * Apply a callback in all elements of the collection
+     *
+     * @param  callable $callback
+     *
+     * @return void
+     */
+    public function walk(callable $callback, $mode = \RecursiveIteratorIterator::LEAVES_ONLY)
+    {
+        $iterator = new \RecursiveArrayIterator($this->content);
+        foreach (new \RecursiveIteratorIterator($iterator, $mode) as $key => $value) {
+            $callback($key, $value);
+        }
+    }
+
+    /**
      * Sum all values in the collection
      *
      * @return mixed
@@ -155,7 +170,7 @@ class Collection implements \ArrayAccess, \IteratorAggregate, \Countable, Sortab
      */
     public function contains($value): bool
     {
-        return in_array($value, $this->content);
+        return in_array(static::check($value), $this->content);
     }
 
     /**
@@ -303,6 +318,28 @@ class Collection implements \ArrayAccess, \IteratorAggregate, \Countable, Sortab
     }
 
     /**
+     * Get a random element of the array
+     *
+     * @param int $num
+     */
+    public function random(int $num = 1)
+    {
+        return $this->return($this[array_rand($this->content, $num)]);
+    }
+
+    /**
+     * Shuffle the array
+     * 
+     * @return self
+     */
+    public function shuffle(): self
+    {
+        $content = $this->content;
+        shuffle($content);
+        return $this->return($content);
+    }
+
+    /**
      * Exchange all keys with their associated values
      *
      * @return self
@@ -369,6 +406,21 @@ class Collection implements \ArrayAccess, \IteratorAggregate, \Countable, Sortab
     }
 
     /**
+     * Return the first non null value
+     *
+     * @return mixed
+     */
+    public function coalesce()
+    {
+        foreach ($this->content as $value) {
+            if (!is_null($value)) {
+                return $this->return($value);
+            }
+        }
+        return null;
+    }
+
+    /**
      * Merge all sublevels of the collection into one
      *
      * @return self
@@ -393,7 +445,18 @@ class Collection implements \ArrayAccess, \IteratorAggregate, \Countable, Sortab
      */
     public function search($value, bool $strict = null)
     {
-        return array_search($value, $this->content, $strict);
+        return array_search(static::check($value), $this->content, $strict);
+    }
+
+    /**
+     * Return the first element of the collection
+     *
+     * @return void
+     */
+    public function first()
+    {
+        reset($this->content);
+        return $this->return(current($this->content));
     }
 
     /**
@@ -564,14 +627,40 @@ class Collection implements \ArrayAccess, \IteratorAggregate, \Countable, Sortab
      */
     public static function combine($keys, $values): self
     {
-        if ($keys instanceof static) {
-            $keys = $keys->get();
-        }
+        return new static(array_combine(static::check($keys), static::check($values)));
+    }
 
-        if ($values instanceof static) {
-            $values = $values->get();
-        }
-        
-        return new static(array_combine($keys, $values));
+     /**
+     * Create a collection, containing a range of elements
+     *
+     * @param  mixed $start
+     * @param  mixed $end
+     * @param  int   $step
+     *
+     * @return self
+     */
+    public static function range($start, $end, $step = 1): self
+    {
+        return new static(range($start, $end, $step));
+    }
+
+    /**
+     * Check if the value is instance of self and extract the content
+     *
+     * @return mixed
+     */
+    private static function check($value) {
+        return $value instanceof static ? $value->get() : $value;
+    }
+
+    /**
+     * Check each value of a list, and if it is instance of self and extract the content
+     *
+     * @return mixed
+     */
+    private static function checkAll(array $values) {
+        return array_map(function($value) {
+            return static::check($value);
+        }, $values);
     }
 }

@@ -58,6 +58,15 @@ class CollectionIterator implements \Iterator
     }
 
     /**
+     * Return the internal array pointer of an array
+     *
+     * @return void
+     */
+    public function previous() {
+        prev($this->content);
+    }
+
+    /**
      * Check if the current position of the array is valid
      *
      * @return bool

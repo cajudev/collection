@@ -16,9 +16,7 @@ trait ArrayAccessTrait
      */
     public function offsetSet($key, $value)
     {
-        if (Collection::isCollection($value)) {
-            $value = $value->get();
-        }
+        $value = static::check($value);
 
         if ($key === null) {
             $this->content[] = $value;
