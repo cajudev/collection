@@ -928,4 +928,12 @@ class CollectionTest extends TestCase
 
         self::assertTrue($cartesian->contains($shuffle));
     }
+
+    public function test_is_collection_should_return_true() {
+        self::assertTrue(Collection::isCollection(new Collection()));
+    }
+
+    public function test_is_collection_should_return_false() {
+        self::assertFalse(Collection::isCollection([]));
+    }
 }
