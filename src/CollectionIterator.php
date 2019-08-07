@@ -6,7 +6,6 @@ use Cajudev\Collection;
 
 class CollectionIterator implements \Iterator
 {
-    private $class;
     private $content;
 
     /**
@@ -16,9 +15,8 @@ class CollectionIterator implements \Iterator
      *
      * @return void
      */
-    public function __construct(Collection $collection) {
-        $this->reflection = new \ReflectionClass($collection);
-        $this->content    = $collection->get();
+    public function __construct(array $content) {
+        $this->content = $content;
     }
 
     /**
@@ -36,7 +34,7 @@ class CollectionIterator implements \Iterator
      * @return mixed
      */
     public function current() {
-        return $this->return(current($this->content));
+        return current($this->content);
     }
 
     /**
@@ -73,15 +71,5 @@ class CollectionIterator implements \Iterator
      */
     public function valid() {
         return !is_null(key($this->content));
-    }
-
-    /**
-     * Transform the return into z Collection, if it is an array
-     *
-     * @return mixed
-     */
-    private function return($content) {
-        $class = $this->reflection->getName();
-        return is_array($content) ? new $class($content) : $content;
     }
 }

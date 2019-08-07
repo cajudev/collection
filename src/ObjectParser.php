@@ -10,9 +10,6 @@ class ObjectParser implements Parser
     private $object;
 
     public function __construct($object) {
-        if (!is_object($object)) {
-            throw new \InvalidArgumentException('Invalid argument received');
-        }
         $this->object = $object;
     }
 
@@ -23,10 +20,6 @@ class ObjectParser implements Parser
      */
     public function parse(): array
     {
-        if ($this->object instanceof Collection) {
-            return $this->object->get();
-        }
-
         $return = [];
         foreach ((array)$this->object as $key => $value) {
             $return[preg_replace('/.*\0(.*)/', '\1', $key)] = $value;

@@ -19,6 +19,9 @@ class Collection implements \ArrayAccess, \IteratorAggregate, \Countable, Sortab
     const DOT_NOTATION      = '/(?<=\.|^)(?<key>[^.:]+)(?=\.|$)/';
     const INTERVAL_NOTATION = '/^(?<start>\d+):(?<end>\d+)$/';
 
+    const COLLECTION_TO_ARRAY = 0;
+    const ARRAY_TO_COLLECTION = 1;
+
     protected $content;
     protected $length;
 
@@ -29,8 +32,32 @@ class Collection implements \ArrayAccess, \IteratorAggregate, \Countable, Sortab
      */
     public function __construct($content = [])
     {
-        $this->content = is_array($content) ? $content : (new ObjectParser($content))->parse();
+        $this->content = $this->construct($content);
         $this->count();
+    }
+  
+    /**
+     * Parse the __construct argument received
+     *
+     * @param  mixed $content
+     *
+     * @return array
+     */
+    private function construct($content): array {
+        if ($content instanceof static) {
+            return $content->get();
+        }
+  
+        if (is_object($content)) {
+            $parser = new ObjectParser($content);
+            return $parser->parse();
+        }
+  
+        if (is_array($content)) {
+            return static::check($content);
+        }
+  
+        throw new \InvalidArgumentException('Invalid Type: Argument must be an array or object.');
     }
 
     /**
@@ -72,7 +99,7 @@ class Collection implements \ArrayAccess, \IteratorAggregate, \Countable, Sortab
      */
     public function getIterator()
     {
-        return new CollectionIterator($this);
+        return new CollectionIterator($this->content);
     }
 
     /**
@@ -84,7 +111,7 @@ class Collection implements \ArrayAccess, \IteratorAggregate, \Countable, Sortab
      */
     public function unshift(...$values): self
     {
-        array_unshift($this->content, ...static::checkAll($values));
+        array_unshift($this->content, ...static::check($values));
         $this->increment(count($values));
         return $this;
     }
@@ -98,7 +125,7 @@ class Collection implements \ArrayAccess, \IteratorAggregate, \Countable, Sortab
      */
     public function push(...$values): self
     {
-        array_push($this->content, ...static::checkAll($values));
+        array_push($this->content, ...static::check($values));
         $this->increment(count($values));
         return $this;
     }
@@ -106,19 +133,21 @@ class Collection implements \ArrayAccess, \IteratorAggregate, \Countable, Sortab
     /**
      * Perform a simplified for loop
      *
-     * @param  int     $i
-     * @param  int     $add
+     * @param  int      $i
+     * @param  int      $add
      * @param  callable $callback
+     * @param  int      $mode
      *
      * @return void
      */
-    public function for(int $i, int $add, callable $callback)
+    public function for(int $i, int $add, callable $callback, int $mode = self::COLLECTION_TO_ARRAY)
     {
         $keys   = array_keys($this->content);
         $count  = count($this->content);
 
         for ($i; ($add >= 0 ? $i < $count : $i >= 0); $i += $add) {
-            $callback($keys[$i], $this->content[$keys[$i]]);
+            $value = static::parse($this->content[$keys[$i]], $mode);
+            $callback($keys[$i], $value);
         }
     }
 
@@ -126,12 +155,14 @@ class Collection implements \ArrayAccess, \IteratorAggregate, \Countable, Sortab
      * Perform a foreach loop
      *
      * @param  callable $callback
+     * @param  int      $mode
      *
      * @return void
      */
-    public function each(callable $callback)
+    public function each(callable $callback, int $mode = self::COLLECTION_TO_ARRAY)
     {
         foreach ($this->content as $key => $value) {
+            $value = static::parse($value, $mode);
             $callback($key, $value);
         }
     }
@@ -140,13 +171,16 @@ class Collection implements \ArrayAccess, \IteratorAggregate, \Countable, Sortab
      * Apply a callback in all elements of the collection
      *
      * @param  callable $callback
+     * @param  int      $type
+     * @param  int      $mode
      *
      * @return void
      */
-    public function walk(callable $callback, $mode = \RecursiveIteratorIterator::LEAVES_ONLY)
+    public function walk(callable $callback, $type = \RecursiveIteratorIterator::LEAVES_ONLY, int $mode = self::COLLECTION_TO_ARRAY)
     {
         $iterator = new \RecursiveArrayIterator($this->content);
-        foreach (new \RecursiveIteratorIterator($iterator, $mode) as $key => $value) {
+        foreach (new \RecursiveIteratorIterator($iterator, $type) as $key => $value) {
+            $value = static::parse($value, $mode);
             $callback($key, $value);
         }
     }
@@ -170,57 +204,67 @@ class Collection implements \ArrayAccess, \IteratorAggregate, \Countable, Sortab
      */
     public function contains($value): bool
     {
-        return in_array(static::check($value), $this->content);
+        return in_array(static::parse($value), $this->content);
     }
 
     /**
      * Applies the callback to all elements
      *
      * @param  callable $callback
+     * @param  int      $mode
      *
      * @return self
      */
-    public function map(callable $callback): self
+    public function map(callable $callback, int $mode = self::COLLECTION_TO_ARRAY): self
     {
-        $keys   = array_keys($this->content);
-        $result = array_map($callback, $keys, $this->content);
-        return $this->return(array_reduce($result, function($a, $b) {
-            return (array) $a + (array) $b;
-        }));
+        $return = [];
+        foreach ($this->content as $key => $value) {
+            $value  = static::parse($value, $mode);
+            $result = $callback($key, $value);
+            $value  = reset($result);
+            $return[key($result)] = is_array($value) ? static::check($value) : static::parse($value);
+        }
+        return $this->return($return);
     }
 
     /**
      * Filter the collection using a callable function
      *
      * @param  callable $callback
+     * @param  int      $mode
      *
      * @return self
      */
-    public function filter(callable $callback): self
+    public function filter(callable $callback, int $mode = self::COLLECTION_TO_ARRAY): self
     {
-        $filter = [];
-        // array_filter is not used as for the order of the arguments differs from others methods
+        $return = [];
         foreach ($this->content as $key => $value) {
+            $value = static::parse($value, $mode);
             if ($callback($key, $value)) {
-                $filter[$key] = $value;
+                $return[$key] = $value;
             }
         }
-        return $this->return($filter);
+        return $this->return($return);
     }
 
     /**
      * Reduce the collection to a single value
      *
      * @param  callable $callback
+     * @param  int      $mode
      *
      * @return self
      */
-    public function reduce(callable $callback)
+    public function reduce(callable $callback, int $mode = self::COLLECTION_TO_ARRAY)
     {
-        $content = $this->content;
-        $initial = array_shift($content);
-        $result  = array_reduce($content, $callback, $initial);
-        return $this->return($result);
+        $content  = $this->content;
+        $previous = array_shift($content);
+        while ($next = array_shift($content)) {
+            $previous = static::parse($previous, $mode);
+            $next     = static::parse($next, $mode);
+            $previous = $callback($previous, $next);
+        }
+        return $this->return($previous);
     }
 
     /**
@@ -290,9 +334,8 @@ class Collection implements \ArrayAccess, \IteratorAggregate, \Countable, Sortab
      */
     public function shift()
     {
-        $value = array_shift($this->content);
         $this->decrement();
-        return $this->return($value);
+        return $this->return(array_shift($this->content));
     }
 
     /**
@@ -302,9 +345,8 @@ class Collection implements \ArrayAccess, \IteratorAggregate, \Countable, Sortab
      */
     public function pop()
     {
-        $value = array_pop($this->content);
         $this->decrement();
-        return $this->return($value);
+        return $this->return(array_pop($this->content));
     }
 
     /**
@@ -445,7 +487,7 @@ class Collection implements \ArrayAccess, \IteratorAggregate, \Countable, Sortab
      */
     public function search($value, bool $strict = null)
     {
-        return array_search(static::check($value), $this->content, $strict);
+        return array_search(static::parse($value), $this->content, $strict);
     }
 
     /**
@@ -455,8 +497,7 @@ class Collection implements \ArrayAccess, \IteratorAggregate, \Countable, Sortab
      */
     public function first()
     {
-        reset($this->content);
-        return $this->return(current($this->content));
+        return $this->return(reset($this->content));
     }
 
     /**
@@ -466,9 +507,7 @@ class Collection implements \ArrayAccess, \IteratorAggregate, \Countable, Sortab
      */
     public function last()
     {
-        $value = end($this->content);
-        reset($this->content);
-        return $this->return($value);
+        return $this->return(end($this->content));
     }
 
     /**
@@ -548,8 +587,9 @@ class Collection implements \ArrayAccess, \IteratorAggregate, \Countable, Sortab
      *
      * @return mixed
      */
-    protected function return($content) {
-        return is_array($content) ? new static($content) : $content;
+    protected function return($content)
+    {
+        return static::parse($content, self::ARRAY_TO_COLLECTION);
     }
 
     /**
@@ -557,7 +597,8 @@ class Collection implements \ArrayAccess, \IteratorAggregate, \Countable, Sortab
      *
      * @return void
      */
-    private function increment(int $value = 1) {
+    private function increment(int $value = 1)
+    {
         $this->length += $value;
     }
 
@@ -566,7 +607,8 @@ class Collection implements \ArrayAccess, \IteratorAggregate, \Countable, Sortab
      *
      * @return void
      */
-    private function decrement(int $value = 1) {
+    private function decrement(int $value = 1)
+    {
         $this->length -= $value;
     }
 
@@ -574,25 +616,29 @@ class Collection implements \ArrayAccess, \IteratorAggregate, \Countable, Sortab
     // ======================= MAGIC METHODS =========================== //
     // ================================================================= //
 
-    public function __get($property) {
+    public function __get($property)
+    {
         if ($property === 'length') {
             return $this->length;
         }
         return $this[$property] ?? null;
     }
 
-    public function __set($property, $value) {
+    public function __set($property, $value)
+    {
         if ($property === 'length') {
             throw new \InvalidArgumentException('length property is readonly');
         }
         $this[$property] = $value;
     }
 
-    public function __isset($property) {
+    public function __isset($property)
+    {
         return isset($this->content[$property]);
     }
 
-    public function __unset($property) {
+    public function __unset($property)
+    {
         unset($this->content[$property]);
     }
 
@@ -627,7 +673,7 @@ class Collection implements \ArrayAccess, \IteratorAggregate, \Countable, Sortab
      */
     public static function combine($keys, $values): self
     {
-        return new static(array_combine(static::check($keys), static::check($values)));
+        return new static(array_combine(static::parse($keys), static::parse($values)));
     }
 
      /**
@@ -644,23 +690,39 @@ class Collection implements \ArrayAccess, \IteratorAggregate, \Countable, Sortab
         return new static(range($start, $end, $step));
     }
 
-    /**
-     * Check if the value is instance of self and extract the content
-     *
-     * @return mixed
-     */
-    private static function check($value) {
-        return $value instanceof static ? $value->get() : $value;
+   /**
+    * Check all elements in an array and when it is a Collection, get its internal value
+    *
+    * @param  array $content
+    *
+    * @return array
+    */
+    private static function check(array $content): array
+    {
+        foreach ($content as $key => $value) {
+            $content[$key] = is_array($value) ? static::check($value) : static::parse($value);
+        }
+        return $content;
     }
 
     /**
-     * Check each value of a list, and if it is instance of self and extract the content
-     *
-     * @return mixed
-     */
-    private static function checkAll(array $values) {
-        return array_map(function($value) {
-            return static::check($value);
-        }, $values);
-    }
+    * Parse a value according with the received mode
+    *
+    * @param  mixed $value
+    *
+    * @return mixed
+    */
+   private static function parse($value, int $mode = self::COLLECTION_TO_ARRAY)
+   {
+
+        if ($mode === self::ARRAY_TO_COLLECTION) {
+            return is_array($value) ? new static($value) : $value;
+        }
+
+        if ($mode === self::COLLECTION_TO_ARRAY) {
+            return $value instanceof static ? $value->get() : $value;
+        }
+
+       return $value;
+   }
 }

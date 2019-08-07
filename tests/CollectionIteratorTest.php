@@ -7,7 +7,7 @@ use PHPUnit\Framework\TestCase;
 class CollectionIteratorTest extends TestCase
 {
     public function setUp() {
-        $this->iterator = new CollectionIterator(new Collection(['lorem' => 'ipsum', 'dolor' => 'sit', 'amet' => 'consectetur']));
+        $this->iterator = new CollectionIterator(['lorem' => 'ipsum', 'dolor' => 'sit', 'amet' => 'consectetur']);
     }
 
     public function test_valid_should_return_true()
