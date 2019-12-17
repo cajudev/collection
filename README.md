@@ -10,12 +10,13 @@
 
 Uma maneira de escrever códigos em php de maneira mais orientada à objetos
 
-Leia a documentação completa em: https://cajudev.readthedocs.io/pt_BR/latest/collection
+Leia a documentação completa em: https://cajudev.readthedocs.io/projects/collection/pt/v2/
 
 ## Características
 
--   Segue os padrões PSR-1, PSR-2 e PSR-4
--   Testes unitários com PHPUnit
+- Segue os padrões PSR-1, PSR-2 e PSR-4
+- Testes unitários com PHPUnit
+- Zero dependências
 
 ## Instalação
 
