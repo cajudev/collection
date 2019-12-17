@@ -20,6 +20,4 @@ Leia a documentação completa em: https://cajudev.readthedocs.io/projects/colle
 
 ## Instalação
 
-PHP 7.3+ ``composer require cajudev/collection "^3"``
-
-PHP 7.0 ``composer require cajudev/collection "^2"``
+``composer require cajudev/collection "^2"``
