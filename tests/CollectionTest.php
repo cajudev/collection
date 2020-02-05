@@ -496,7 +496,15 @@ class CollectionTest extends TestCase
         }
     }
 
-    public function test_each_should_iterate_object()
+    public function test_each_should_iterate_object_receiving_only_value()
+    {
+        $collection = new Collection(['lorem', 'ipsum', 'dolor', 'sit']);
+        $collection->each(function ($value) use ($collection) {
+            $this->assertInternalType('string', $value);
+        });
+    }
+
+    public function test_each_should_iterate_object_receiving_key_and_value()
     {
         $collection = new Collection(['lorem', 'ipsum', 'dolor', 'sit']);
         $collection->each(function ($key, $value) use ($collection) {
@@ -507,7 +515,7 @@ class CollectionTest extends TestCase
     public function test_each_should_return_array_when_second_parameter_is_false()
     {
         $collection = new Collection([['lorem' => 'ipsum'], ['dolor' => 'sit']]);
-        $collection->each(function ($key, $value) {
+        $collection->each(function ($value) {
             $this->assertInternalType('array', $value);
         });
     }
@@ -515,12 +523,20 @@ class CollectionTest extends TestCase
     public function test_each_should_return_collection_when_second_parameter_is_true()
     {
         $collection = new Collection([['lorem' => 'ipsum'], ['dolor' => 'sit']]);
-        $collection->each(function ($key, $value) {
+        $collection->each(function ($value) {
             $this->assertInstanceOf(Collection::class, $value);
         }, true);
     }
 
-    public function test_for_should_iterate_object_with_steps()
+    public function test_for_should_iterate_object_with_steps_receiving_only_value()
+    {
+        $collection = new Collection(['lorem', 'ipsum', 'dolor', 'sit']);
+        $collection->for(0, 2, function ($value) use ($collection) {
+            $this->assertInternalType('string', $value);
+        });
+    }
+
+    public function test_for_should_iterate_object_with_steps_receiving_key_and_value()
     {
         $collection = new Collection(['lorem', 'ipsum', 'dolor', 'sit']);
         $collection->for(0, 2, function ($key, $value) use ($collection) {
@@ -531,7 +547,7 @@ class CollectionTest extends TestCase
     public function test_for_should_return_array_when_second_parameter_is_false()
     {
         $collection = new Collection([['lorem' => 'ipsum'], ['dolor' => 'sit']]);
-        $collection->for(0, 2, function ($key, $value) {
+        $collection->for(0, 2, function ($value) {
             $this->assertInternalType('array', $value);
         });
     }
@@ -539,7 +555,7 @@ class CollectionTest extends TestCase
     public function test_for_should_return_collection_when_second_parameter_is_true()
     {
         $collection = new Collection([['lorem' => 'ipsum'], ['dolor' => 'sit']]);
-        $collection->for(0, 2, function ($key, $value) {
+        $collection->for(0, 2, function ($value) {
             $this->assertInstanceOf(Collection::class, $value);
         }, true);
     }
@@ -550,6 +566,15 @@ class CollectionTest extends TestCase
         $collection->for(3, -1, function ($key, $value) use ($collection) {
             $this->assertEquals($collection[$key], $value);
         });
+    }
+
+    public function test_map_should_update_only_values()
+    {
+        $collection = new Collection(['lorem' => 'ipsum', 'dolor' => 'sit']);
+        $map = $collection->map(function ($value) {
+            return strtoupper($value);
+        });
+        $this->assertEquals(['lorem' => 'IPSUM', 'dolor' => 'SIT'], $map->get());
     }
 
     public function test_map_should_update_values_and_keys()
@@ -579,14 +604,24 @@ class CollectionTest extends TestCase
         }, true);
     }
 
-    public function test_filter_should_remove_values_when_return_false()
+    public function test_filter_by_value_should_remove_values_when_return_false()
     {
         $collection = new Collection([1, 2, 3, 4, 5, 6, 7, 8, 9]);
-        $filter = $collection->filter(function ($key, $value) {
+        $filter = $collection->filter(function ($value) {
             return $value < 5;
         });
         $expect = [1, 2, 3, 4];
         $this->assertEquals($expect, $filter->get());
+    }
+
+    public function test_filter_by_key_should_remove_values_when_return_false()
+    {
+        $collection = new Collection([1, 2, 3, 4, 5, 6, 7, 8, 9]);
+        $filter = $collection->filter(function ($key, $value) {
+            return $key > 5;
+        });
+        $expect = [7, 8, 9];
+        $this->assertEquals($expect, $filter->values()->get());
     }
 
     public function test_filter_should_return_array_when_second_parameter_is_false()
