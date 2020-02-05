@@ -6,14 +6,6 @@ use Cajudev\Collection;
 
 trait ArrayAccessTrait
 {
-    /**
-     * Set a value in array
-     *
-     * @param  mixed $key
-     * @param  mixed $value
-     *
-     * @return void
-     */
     public function offsetSet($key, $value)
     {
         $value = static::parse($value);
@@ -55,18 +47,11 @@ trait ArrayAccessTrait
         throw new \InvalidArgumentException("Wrong Pattern {$key} is not a valid key");
     }
 
-    /**
-     * Check if a key is set
-     *
-     * @param  mixed $key
-     *
-     * @return bool
-     */
     public function offsetExists($key): bool
     {
         if (preg_match(static::KEY_NOTATION, $key)) {
             return isset($this->content[$key]);
-        } 
+        }
         
         if (preg_match_all(static::DOT_NOTATION, $key, $keys)) {
             $ret =& $this->content;
@@ -85,7 +70,7 @@ trait ArrayAccessTrait
             list($min, $max)  = $start < $end ? [$start, $end] : [$end, $start];
 
             for ($i = $min; $i <= $max; $i++) {
-                if(!isset($this->content[$i])) {
+                if (!isset($this->content[$i])) {
                     return false;
                 }
             }
@@ -95,13 +80,6 @@ trait ArrayAccessTrait
         throw new \InvalidArgumentException("Wrong Pattern {$key} is not a valid key");
     }
 
-    /**
-     * Unset a value in array
-     *
-     * @param  mixed $key
-     *
-     * @return void
-     */
     public function offsetUnset($key)
     {
         if (preg_match(static::KEY_NOTATION, $key)) {
@@ -139,13 +117,6 @@ trait ArrayAccessTrait
         throw new \InvalidArgumentException("Wrong Pattern {$key} is not a valid key");
     }
 
-    /**
-     * Get a value from the array
-     *
-     * @param  mixed $key
-     *
-     * @return mixed
-     */
     public function &offsetGet($key)
     {
         $ret =& $this->offsetGetValue($key);
@@ -156,10 +127,8 @@ trait ArrayAccessTrait
         return $return;
     }
 
-    /**
-     * Auxiliary function of offsetGet
-     */
-    private function &offsetGetValue($key) {
+    private function &offsetGetValue($key)
+    {
         if (preg_match(static::KEY_NOTATION, $key)) {
             $this->increment(!array_key_exists($key, $this->content));
             return $this->content[$key];
@@ -180,7 +149,7 @@ trait ArrayAccessTrait
 
         $start = $result['start'];
         $end   = $result['end'];
-        $ret   = $start < $end 
+        $ret   = $start < $end
                ? array_slice($this->content, $start, $end - $start + 1)
                : array_reverse(array_slice($this->content, $end, $start - $end + 1));
 

@@ -9,7 +9,8 @@ class ObjectParser implements Parser
 {
     private $object;
 
-    public function __construct($object) {
+    public function __construct($object)
+    {
         $this->object = $object;
     }
 
