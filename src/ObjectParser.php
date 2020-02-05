@@ -13,12 +13,7 @@ class ObjectParser implements Parser
     {
         $this->object = $object;
     }
-
-    /**
-     * Transform all properties of a object into an associative array
-     *
-     * @return array
-     */
+    
     public function parse(): array
     {
         $return = [];

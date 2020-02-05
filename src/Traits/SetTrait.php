@@ -2,19 +2,21 @@
 
 namespace Cajudev\Traits;
 
+use Cajudev\Interfaces\Set;
+
 trait SetTrait
 {
-    public function union(): self
+    public function union(): Set
     {
         return $this->merge()->unique();
     }
 
-    public function diff(): self
+    public function diff(): Set
     {
         return $this->reduce('array_diff');
     }
 
-    public function outer(): self
+    public function outer(): Set
     {
         return $this->return([
             $this->diff()->values()->get(),
@@ -22,12 +24,12 @@ trait SetTrait
         ]);
     }
 
-    public function intersect(): self
+    public function intersect(): Set
     {
         return $this->reduce('array_intersect');
     }
 
-    public function cartesian(): self
+    public function cartesian(): Set
     {
         $cartesian = [[]];
         foreach ($this->content as $key => $values) {

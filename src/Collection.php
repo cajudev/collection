@@ -131,7 +131,7 @@ class Collection implements CollectionInterface, \ArrayAccess, \IteratorAggregat
         $callback = new Callback($callback);
         foreach ($this->content as $key => $value) {
             $value  = static::parse($value, $array_as_collection);
-            $n_args = $callback->args();
+            $n_args = $callback->args()->length;
             $result = $callback->exec($key, $value);
             $value  = $n_args > 1 ? reset($result) : $result;
             $return[$n_args > 1 ? key($result) : $key] = is_array($value) ? static::sanitize($value) : static::parse($value);

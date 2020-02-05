@@ -2,6 +2,8 @@
 
 namespace Cajudev;
 
+use Cajudev\Interfaces\CollectionInterface;
+
 class Callback
 {
     private $callback;
@@ -19,13 +21,13 @@ class Callback
     public function exec($key, $value)
     {
         $callback = $this->callback;
-        return $this->args() > 1 ? $callback($key, $value) : $callback($value);
+        return $this->args()->length > 1 ? $callback($key, $value) : $callback($value);
     }
 
-    public function args(): int
+    public function args(): CollectionInterface
     {
-        return (is_array($this->callback)
+        return new Collection((is_array($this->callback)
             ? new \ReflectionMethod($this->callback[0], $this->callback[1])
-            : new \ReflectionFunction($this->callback))->getNumberOfParameters();
+            : new \ReflectionFunction($this->callback))->getParameters());
     }
 }

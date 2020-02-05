@@ -480,6 +480,13 @@ class CollectionTest extends TestCase
         $this->assertEquals(false, $array->isset('lorem.ipsum'));
     }
 
+    public function test_unset_with_dot_notation_non_existing_key()
+    {
+        $array = new Collection();
+        $array->unset('lorem.ipsum');
+        $this->assertEquals(false, $array->isset('lorem.ipsum'));
+    }
+
     public function test_iterator_foreach_should_iterate_object()
     {
         $collection = new Collection(['lorem', 'ipsum', 'dolor', 'sit']);
@@ -861,8 +868,8 @@ class CollectionTest extends TestCase
     public function test_usort_should_order_content()
     {
         $collection = new Collection(['three' => 3, 'eight' => 8, 'two' => 2]);
-        $expect = ['two' => 2, 'three' => 3, 'eight' => 8];
-        $this->assertSame($expect, $collection->krsort(function ($a, $b) {
+        $expect = [2, 3, 8];
+        $this->assertSame($expect, $collection->usort(function ($a, $b) {
             return $a <=> $b;
         })->get());
     }
