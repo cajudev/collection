@@ -84,30 +84,30 @@ class Collection implements CollectionInterface, \ArrayAccess, \IteratorAggregat
         return $this;
     }
 
-    public function for(int $i, int $add, callable $callback, bool $arrayAsCollection = false)
+    public function for(int $i, int $add, callable $callback, bool $array_as_collection = false)
     {
         $keys   = array_keys($this->content);
         $count  = count($this->content);
 
         for ($i; ($add >= 0 ? $i < $count : $i >= 0); $i += $add) {
-            $value = static::parse($this->content[$keys[$i]], $arrayAsCollection);
+            $value = static::parse($this->content[$keys[$i]], $array_as_collection);
             $callback($keys[$i], $value);
         }
     }
 
-    public function each(callable $callback, bool $arrayAsCollection = false)
+    public function each(callable $callback, bool $array_as_collection = false)
     {
         foreach ($this->content as $key => $value) {
-            $value = static::parse($value, $arrayAsCollection);
+            $value = static::parse($value, $array_as_collection);
             $callback($key, $value);
         }
     }
 
-    public function walk(callable $callback, $type = \RecursiveIteratorIterator::LEAVES_ONLY, bool $arrayAsCollection = false)
+    public function walk(callable $callback, $type = \RecursiveIteratorIterator::LEAVES_ONLY, bool $array_as_collection = false)
     {
         $iterator = new \RecursiveArrayIterator($this->content);
         foreach (new \RecursiveIteratorIterator($iterator, $type) as $key => $value) {
-            $value = static::parse($value, $arrayAsCollection);
+            $value = static::parse($value, $array_as_collection);
             $callback($key, $value);
         }
     }
@@ -122,11 +122,11 @@ class Collection implements CollectionInterface, \ArrayAccess, \IteratorAggregat
         return in_array(static::parse($value), $this->content);
     }
 
-    public function map(callable $callback, bool $arrayAsCollection = false): CollectionInterface
+    public function map(callable $callback, bool $array_as_collection = false): CollectionInterface
     {
         $return = [];
         foreach ($this->content as $key => $value) {
-            $value  = static::parse($value, $arrayAsCollection);
+            $value  = static::parse($value, $array_as_collection);
             $result = $callback($key, $value);
             $value  = reset($result);
             $return[key($result)] = is_array($value) ? static::sanitize($value) : static::parse($value);
@@ -134,11 +134,11 @@ class Collection implements CollectionInterface, \ArrayAccess, \IteratorAggregat
         return $this->return($return);
     }
 
-    public function filter(callable $callback, bool $arrayAsCollection = false): CollectionInterface
+    public function filter(callable $callback, bool $array_as_collection = false): CollectionInterface
     {
         $return = [];
         foreach ($this->content as $key => $value) {
-            $value = static::parse($value, $arrayAsCollection);
+            $value = static::parse($value, $array_as_collection);
             if ($callback($key, $value)) {
                 $return[$key] = $value;
             }
@@ -146,22 +146,22 @@ class Collection implements CollectionInterface, \ArrayAccess, \IteratorAggregat
         return $this->return($return);
     }
 
-    public function reduce(callable $callback, bool $arrayAsCollection = false)
+    public function reduce(callable $callback, bool $array_as_collection = false)
     {
         $content  = $this->content;
         $previous = array_shift($content);
         while ($next = array_shift($content)) {
-            $previous = static::parse($previous, $arrayAsCollection);
-            $next     = static::parse($next, $arrayAsCollection);
+            $previous = static::parse($previous, $array_as_collection);
+            $next     = static::parse($next, $array_as_collection);
             $previous = $callback($previous, $next);
         }
         return $this->return($previous);
     }
 
-    public function find(callable $callback, bool $arrayAsCollection = false)
+    public function find(callable $callback, bool $array_as_collection = false)
     {
         foreach ($this->content as $key => $value) {
-            $value = static::parse($value, $arrayAsCollection);
+            $value = static::parse($value, $array_as_collection);
             if ($callback($key, $value)) {
                 return $this->return($value);
             }
@@ -422,9 +422,9 @@ class Collection implements CollectionInterface, \ArrayAccess, \IteratorAggregat
         return $content;
     }
 
-    private static function parse($value, bool $arrayAsCollection = false)
+    private static function parse($value, bool $array_as_collection = false)
     {
-        if ($arrayAsCollection) {
+        if ($array_as_collection) {
             return is_array($value) ? new static($value) : $value;
         }
         return $value instanceof static ? $value->get() : $value;

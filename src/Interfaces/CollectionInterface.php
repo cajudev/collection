@@ -12,17 +12,17 @@ interface CollectionInterface
 
     public function count(int $mode = COUNT_NORMAL): int;
 
-    public function for(int $i, int $add, callable $callback, bool $arrayAsCollection = false);
-    public function each(callable $callback, bool $arrayAsCollection = false);
-    public function walk(callable $callback, $type = \RecursiveIteratorIterator::LEAVES_ONLY, bool $arrayAsCollection = false);
+    public function for(int $i, int $add, callable $callback, bool $array_as_collection = false);
+    public function each(callable $callback, bool $array_as_collection = false);
+    public function walk(callable $callback, $type = \RecursiveIteratorIterator::LEAVES_ONLY, bool $array_as_collection = false);
    
     public function sum(): int;
     public function contains($value): bool;
 
-    public function map(callable $callback, bool $arrayAsCollection = false): CollectionInterface;
-    public function filter(callable $callback, bool $arrayAsCollection = false): CollectionInterface;
-    public function reduce(callable $callback, bool $arrayAsCollection = false);
-    public function find(callable $callback, bool $arrayAsCollection = false);
+    public function map(callable $callback, bool $array_as_collection = false): CollectionInterface;
+    public function filter(callable $callback, bool $array_as_collection = false): CollectionInterface;
+    public function reduce(callable $callback, bool $array_as_collection = false);
+    public function find(callable $callback, bool $array_as_collection = false);
 
     public function isset($key): bool;
     public function noset($key): bool;
