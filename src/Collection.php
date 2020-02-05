@@ -8,8 +8,9 @@ use Cajudev\CollectionIterator;
 use Cajudev\Interfaces\Set;
 use Cajudev\Interfaces\Mixed;
 use Cajudev\Interfaces\Sortable;
+use Cajudev\Interfaces\CollectionInterface;
 
-class Collection implements \ArrayAccess, \IteratorAggregate, \Countable, Sortable, Set
+class Collection implements CollectionInterface, \ArrayAccess, \IteratorAggregate, \Countable, Sortable, Set
 {
     use \Cajudev\Traits\SetTrait;
     use \Cajudev\Traits\SortableTrait;
@@ -19,31 +20,17 @@ class Collection implements \ArrayAccess, \IteratorAggregate, \Countable, Sortab
     const DOT_NOTATION      = '/(?<=\.|^)(?<key>[^.:]+)(?=\.|$)/';
     const INTERVAL_NOTATION = '/^(?<start>\d+):(?<end>\d+)$/';
 
-    const COLLECTION_TO_ARRAY = 0;
-    const ARRAY_TO_COLLECTION = 1;
-
     protected $content;
     protected $length;
 
-    /**
-     * @param  mixed $content
-     *
-     * @return void
-     */
     public function __construct($content = [])
     {
         $this->content = $this->construct($content);
         $this->count();
     }
   
-    /**
-     * Parse the __construct argument received
-     *
-     * @param  mixed $content
-     *
-     * @return array
-     */
-    private function construct($content): array {
+    private function construct($content): array
+    {
         if ($content instanceof static) {
             return $content->get();
         }
@@ -54,20 +41,13 @@ class Collection implements \ArrayAccess, \IteratorAggregate, \Countable, Sortab
         }
   
         if (is_array($content)) {
-            return static::check($content);
+            return static::sanitize($content);
         }
   
         throw new \InvalidArgumentException('Invalid Type: Argument must be an array or object.');
     }
 
-    /**
-     * Set the content of the array by reference
-     *
-     * @param  array $array
-     *
-     * @return self
-     */
-    public function setByReference(array &$array = null): self
+    public function setByReference(array &$array = null): CollectionInterface
     {
         $array = $array ?? [];
         $this->content =& $array;
@@ -75,13 +55,6 @@ class Collection implements \ArrayAccess, \IteratorAggregate, \Countable, Sortab
         return $this;
     }
 
-    /**
-     * Count all elements of the collection
-     * 
-     * @param int $mode
-     *
-     * @return int
-     */
     public function count(int $mode = COUNT_NORMAL): int
     {
         if ($mode === COUNT_RECURSIVE) {
@@ -92,154 +65,80 @@ class Collection implements \ArrayAccess, \IteratorAggregate, \Countable, Sortab
         return $this->length;
     }
 
-    /**
-     * Return the object iterator
-     *
-     * @return CollectionIterator
-     */
-    public function getIterator()
+    public function getIterator(): \Iterator
     {
         return new CollectionIterator($this->content);
     }
 
-    /**
-     * Insert the values on the beginning of the collection
-     *
-     * @param  mixed $values
-     *
-     * @return self
-     */
-    public function unshift(...$values): self
+    public function unshift(...$values): CollectionInterface
     {
-        array_unshift($this->content, ...static::check($values));
+        array_unshift($this->content, ...static::sanitize($values));
         $this->increment(count($values));
         return $this;
     }
 
-    /**
-     * Insert the values on the final of the collection
-     *
-     * @param  mixed $values
-     *
-     * @return self
-     */
-    public function push(...$values): self
+    public function push(...$values): CollectionInterface
     {
-        array_push($this->content, ...static::check($values));
+        array_push($this->content, ...static::sanitize($values));
         $this->increment(count($values));
         return $this;
     }
 
-    /**
-     * Perform a simplified for loop
-     *
-     * @param  int      $i
-     * @param  int      $add
-     * @param  callable $callback
-     * @param  int      $mode
-     *
-     * @return void
-     */
-    public function for(int $i, int $add, callable $callback, int $mode = self::COLLECTION_TO_ARRAY)
+    public function for(int $i, int $add, callable $callback, bool $arrayAsCollection = false)
     {
         $keys   = array_keys($this->content);
         $count  = count($this->content);
 
         for ($i; ($add >= 0 ? $i < $count : $i >= 0); $i += $add) {
-            $value = static::parse($this->content[$keys[$i]], $mode);
+            $value = static::parse($this->content[$keys[$i]], $arrayAsCollection);
             $callback($keys[$i], $value);
         }
     }
 
-    /**
-     * Perform a foreach loop
-     *
-     * @param  callable $callback
-     * @param  int      $mode
-     *
-     * @return void
-     */
-    public function each(callable $callback, int $mode = self::COLLECTION_TO_ARRAY)
+    public function each(callable $callback, bool $arrayAsCollection = false)
     {
         foreach ($this->content as $key => $value) {
-            $value = static::parse($value, $mode);
+            $value = static::parse($value, $arrayAsCollection);
             $callback($key, $value);
         }
     }
 
-    /**
-     * Apply a callback in all elements of the collection
-     *
-     * @param  callable $callback
-     * @param  int      $type
-     * @param  int      $mode
-     *
-     * @return void
-     */
-    public function walk(callable $callback, $type = \RecursiveIteratorIterator::LEAVES_ONLY, int $mode = self::COLLECTION_TO_ARRAY)
+    public function walk(callable $callback, $type = \RecursiveIteratorIterator::LEAVES_ONLY, bool $arrayAsCollection = false)
     {
         $iterator = new \RecursiveArrayIterator($this->content);
         foreach (new \RecursiveIteratorIterator($iterator, $type) as $key => $value) {
-            $value = static::parse($value, $mode);
+            $value = static::parse($value, $arrayAsCollection);
             $callback($key, $value);
         }
     }
 
-    /**
-     * Sum all values in the collection
-     *
-     * @return mixed
-     */
-    public function sum()
+    public function sum(): int
     {
         return array_sum($this->content);
     }
 
-    /**
-     * Check if the value exist in the collection
-     * 
-     * @param mixed $value
-     *
-     * @return bool
-     */
     public function contains($value): bool
     {
         return in_array(static::parse($value), $this->content);
     }
 
-    /**
-     * Applies the callback to all elements
-     *
-     * @param  callable $callback
-     * @param  int      $mode
-     *
-     * @return self
-     */
-    public function map(callable $callback, int $mode = self::COLLECTION_TO_ARRAY): self
+    public function map(callable $callback, bool $arrayAsCollection = false): CollectionInterface
     {
         $return = [];
         foreach ($this->content as $key => $value) {
-            $value  = static::parse($value, $mode);
+            $value  = static::parse($value, $arrayAsCollection);
             $result = $callback($key, $value);
             $value  = reset($result);
-            $return[key($result)] = is_array($value) ? static::check($value) : static::parse($value);
+            $return[key($result)] = is_array($value) ? static::sanitize($value) : static::parse($value);
         }
         return $this->return($return);
     }
 
-    /**
-     * Filter the collection using a callable function
-     *
-     * @param  callable $callback
-     * @param  int      $mode
-     *
-     * @return self
-     */
-    public function filter(callable $callback, int $mode = self::COLLECTION_TO_ARRAY): self
+    public function filter(callable $callback, bool $arrayAsCollection = false): CollectionInterface
     {
         $return = [];
         foreach ($this->content as $key => $value) {
-            $value = static::parse($value, $mode);
+            $value = static::parse($value, $arrayAsCollection);
             if ($callback($key, $value)) {
                 $return[$key] = $value;
             }
@@ -247,211 +146,113 @@ class Collection implements \ArrayAccess, \IteratorAggregate, \Countable, Sortab
         return $this->return($return);
     }
 
-    /**
-     * Reduce the collection to a single value
-     *
-     * @param  callable $callback
-     * @param  int      $mode
-     *
-     * @return self
-     */
-    public function reduce(callable $callback, int $mode = self::COLLECTION_TO_ARRAY)
+    public function reduce(callable $callback, bool $arrayAsCollection = false)
     {
         $content  = $this->content;
         $previous = array_shift($content);
         while ($next = array_shift($content)) {
-            $previous = static::parse($previous, $mode);
-            $next     = static::parse($next, $mode);
+            $previous = static::parse($previous, $arrayAsCollection);
+            $next     = static::parse($next, $arrayAsCollection);
             $previous = $callback($previous, $next);
         }
         return $this->return($previous);
     }
 
-    /**
-     * Determine if a key is set and it's value is not null
-     *
-     * @param  mixed $key
-     *
-     * @return bool
-     */
+    public function find(callable $callback, bool $arrayAsCollection = false)
+    {
+        foreach ($this->content as $key => $value) {
+            $value = static::parse($value, $arrayAsCollection);
+            if ($callback($key, $value)) {
+                return $this->return($value);
+            }
+        }
+        return false;
+    }
+
     public function isset($key): bool
     {
         return isset($this[$key]);
     }
 
-    /**
-     * Determine if a key is not set
-     *
-     * @param  mixed $key
-     *
-     * @return bool
-     */
     public function noset($key): bool
     {
         return !isset($this[$key]);
     }
 
-    /**
-     * Determine wheter a position in collection is empty
-     *
-     * @param  mixed $key
-     *
-     * @return bool
-     */
     public function empty($key): bool
     {
         return empty($this[$key]);
     }
 
-    /**
-     * Determine wheter a position in collection is not empty
-     *
-     * @param  mixed $key
-     *
-     * @return bool
-     */
     public function filled($key): bool
     {
         return !empty($this[$key]);
     }
 
-    /**
-     * Unset a given position of the collection
-     *
-     * @param  mixed $key
-     *
-     * @return void
-     */
     public function unset($key)
     {
         unset($this[$key]);
     }
 
-    /**
-     * Remove the first element from the collection, and return the removed value
-     *
-     * @return mixed
-     */
     public function shift()
     {
         $this->decrement();
         return $this->return(array_shift($this->content));
     }
 
-    /**
-     * Remove the last element from the collection, and return the removed value
-     *
-     * @return mixed
-     */
     public function pop()
     {
         $this->decrement();
         return $this->return(array_pop($this->content));
     }
 
-    /**
-     * Join collection's elements into string
-     *
-     * @return string
-     */
     public function join(string $glue)
     {
         return implode($glue, $this->content);
     }
 
-    /**
-     * Get a random element of the array
-     *
-     * @param int $num
-     */
     public function random(int $num = 1)
     {
         return $this->return($this[array_rand($this->content, $num)]);
     }
 
-    /**
-     * Shuffle the array
-     * 
-     * @return self
-     */
-    public function shuffle(): self
+    public function shuffle(): CollectionInterface
     {
         $content = $this->content;
         shuffle($content);
         return $this->return($content);
     }
 
-    /**
-     * Exchange all keys with their associated values
-     *
-     * @return self
-     */
-    public function flip(): self
+    public function flip(): CollectionInterface
     {
         return $this->return(array_flip($this->content));
     }
 
-    /**
-     * Return a object with all the keys of the collection
-     *
-     * @return self
-     */
-    public function keys(): self
+    public function keys(): CollectionInterface
     {
         return $this->return(array_keys($this->content));
     }
 
-    /**
-     * Return a object with all the values of the collection
-     *
-     * @return self
-     */
-    public function values(): self
+    public function values(): CollectionInterface
     {
         return $this->return(array_values($this->content));
     }
 
-    /**
-     * Return the values from a single column
-     *
-     * @param  mixed $key
-     * @param  mixed $index
-     *
-     * @return self
-     */
     public function column($key, $index = null)
     {
         return $this->return(array_column($this->content, $key, $index));
     }
     
-    /**
-     * Split the collection into parts
-     *
-     * @param  int $size
-     * @param  bool $preserve_keys
-     *
-     * @return self
-     */
-    public function chunk(int $size, bool $preserve_keys = false): self
+    public function chunk(int $size, bool $preserve_keys = false): CollectionInterface
     {
         return $this->return(array_chunk($this->content, $size, $preserve_keys));
     }
 
-    /**
-     * Remove duplicated values
-     *
-     * @return self
-     */
-    public function unique(int $flags = SORT_STRING): self
+    public function unique(int $flags = SORT_STRING): CollectionInterface
     {
         return $this->return(array_unique($this->content, $flags));
     }
 
-    /**
-     * Return the first non null value
-     *
-     * @return mixed
-     */
     public function coalesce()
     {
         foreach ($this->content as $value) {
@@ -462,93 +263,59 @@ class Collection implements \ArrayAccess, \IteratorAggregate, \Countable, Sortab
         return null;
     }
 
-    /**
-     * Merge all sublevels of the collection into one
-     *
-     * @return self
-     */
-    public function merge(): self
+    public function merge(): CollectionInterface
     {
         return $this->reduce('array_merge');
     }
 
-    /**
-     * Reverse the order of the collection
-     *
-     * @return self
-     */
-    public function reverse($preserve_keys = null): self
+    public function reverse($preserve_keys = null): CollectionInterface
     {
         return $this->return(array_reverse($this->content, $preserve_keys));
     }
 
-    /**
-     * Return a key from a value in collection if it exists
-     */
     public function search($value, bool $strict = null)
     {
         return array_search(static::parse($value), $this->content, $strict);
     }
 
-    /**
-     * Return the first element of the collection
-     *
-     * @return void
-     */
     public function first()
     {
         return $this->return(reset($this->content));
     }
 
-    /**
-     * Return the last element of the collection
-     *
-     * @return void
-     */
     public function last()
     {
         return $this->return(end($this->content));
     }
 
-    /**
-     * Change the case of all keys in the collection to lower case
-     *
-     * @return self
-     */
-    public function lower(): self
+    public function lower(): CollectionInterface
     {
-        $lower = function(&$array) use (&$lower) {
+        $lower = function (&$array) use (&$lower) {
             $array = array_change_key_case($array, CASE_LOWER);
-            foreach ($array as $key => $value)
-                if (is_array($value)) $lower($array[$key]);
+            foreach ($array as $key => $value) {
+                if (is_array($value)) {
+                    $lower($array[$key]);
+                }
+            }
         };
         $lower($this->content);
         return $this;
     }
 
-    /**
-     * Change the case of all keys in the collection to upper case
-     *
-     * @return self
-     */
-    public function upper(): self
+    public function upper(): CollectionInterface
     {
-        $upper = function(&$array) use (&$upper) {
+        $upper = function (&$array) use (&$upper) {
             $array = array_change_key_case($array, CASE_UPPER);
-            foreach ($array as $key => $value)
-                if (is_array($value)) $upper($array[$key]);
+            foreach ($array as $key => $value) {
+                if (is_array($value)) {
+                    $upper($array[$key]);
+                }
+            }
         };
         $upper($this->content);
         return $this;
     }
 
-    /**
-     * Get the value associated a given key or keys
-     *
-     * @param  mixed $keys
-     *
-     * @return mixed
-     */
     public function get(...$keys)
     {
         $count = count($keys);
@@ -568,45 +335,22 @@ class Collection implements \ArrayAccess, \IteratorAggregate, \Countable, Sortab
         return $return;
     }
 
-    /**
-     * Insert a value in a associated key
-     *
-     * @param  string $key
-     * $param  mixed $value
-     *
-     * @return mixed
-     */
     public function set(string $key, $value)
     {
         $this[$key] = $value;
         return $this;
     }
 
-    /**
-     * Return a new object if value is an object, else return the value
-     *
-     * @return mixed
-     */
     protected function return($content)
     {
-        return static::parse($content, self::ARRAY_TO_COLLECTION);
+        return static::parse($content, true);
     }
 
-    /**
-     * Increment the length property
-     *
-     * @return void
-     */
     private function increment(int $value = 1)
     {
         $this->length += $value;
     }
 
-    /**
-     * Decrement the length property
-     *
-     * @return void
-     */
     private function decrement(int $value = 1)
     {
         $this->length -= $value;
@@ -651,78 +395,38 @@ class Collection implements \ArrayAccess, \IteratorAggregate, \Countable, Sortab
     // ======================= STATIC METHODS =========================== //
     // ================================================================= //
 
-    /**
-     * Verify whether a element is an Collection object
-     *
-     * @param  mixed $object
-     *
-     * @return bool
-    */
     public static function isCollection($object): bool
     {
         return $object instanceof static;
     }
 
-    /**
-     * Combine two collections, using the first for keys and the second for values
-     *
-     * @param  mixed $keys
-     * @param  mixed $values
-     *
-     * @return self
-     */
-    public static function combine($keys, $values): self
+    public static function combine($keys, $values): CollectionInterface
     {
         return new static(array_combine(static::parse($keys), static::parse($values)));
     }
 
-     /**
-     * Create a collection, containing a range of elements
-     *
-     * @param  mixed $start
-     * @param  mixed $end
-     * @param  int   $step
-     *
-     * @return self
-     */
-    public static function range($start, $end, $step = 1): self
+    public static function range($start, $end, $step = 1): CollectionInterface
     {
         return new static(range($start, $end, $step));
     }
 
-   /**
-    * Check all elements in an array and when it is a Collection, get its internal value
-    *
-    * @param  array $content
-    *
-    * @return array
-    */
-    private static function check(array $content): array
+    // ================================================================= //
+    // ======================= HELPER METHODS ========================== //
+    // ================================================================= //
+
+    private static function sanitize(array $content): array
     {
         foreach ($content as $key => $value) {
-            $content[$key] = is_array($value) ? static::check($value) : static::parse($value);
+            $content[$key] = is_array($value) ? static::sanitize($value) : static::parse($value);
         }
         return $content;
     }
 
-    /**
-    * Parse a value according with the received mode
-    *
-    * @param  mixed $value
-    *
-    * @return mixed
-    */
-   private static function parse($value, int $mode = self::COLLECTION_TO_ARRAY)
-   {
-
-        if ($mode === self::ARRAY_TO_COLLECTION) {
+    private static function parse($value, bool $arrayAsCollection = false)
+    {
+        if ($arrayAsCollection) {
             return is_array($value) ? new static($value) : $value;
         }
-
-        if ($mode === self::COLLECTION_TO_ARRAY) {
-            return $value instanceof static ? $value->get() : $value;
-        }
-
-       return $value;
-   }
+        return $value instanceof static ? $value->get() : $value;
+    }
 }
