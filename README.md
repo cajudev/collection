@@ -1,4 +1,4 @@
-# Bem vindo ao Collection
+# Collection
 
 [![](https://img.shields.io/packagist/v/cajudev/collection.svg)](https://packagist.org/packages/cajudev/collection)
 [![](https://img.shields.io/packagist/dt/cajudev/collection.svg)](https://packagist.org/packages/cajudev/collection)
@@ -8,16 +8,16 @@
 [![](https://img.shields.io/github/issues/cajudev/collection.svg)](https://github.com/cajudev/collection/issues)
 [![](https://img.shields.io/github/contributors/cajudev/collection.svg)](https://github.com/cajudev/collection/graphs/contributors)
 
-Uma maneira de escrever códigos em php de maneira mais orientada à objetos
+A complete library to work with arrays in php
 
-Leia a documentação completa em: https://cajudev.readthedocs.io/projects/collection/pt/v2/
+Read documentation here https://cajudev.readthedocs.io/projects/collection/en/v2/
 
-## Características
+## Features
 
-- Segue os padrões PSR-1, PSR-2 e PSR-4
-- Testes unitários com PHPUnit
-- Zero dependências
+- Respect PSR-1, PSR-2 e PSR-4
+- High coverage of tests
+- Zero third party dependencies
 
-## Instalação
+## Installation
 
-``composer require cajudev/collection "^2"``
+`composer require cajudev/collection "^2"`
