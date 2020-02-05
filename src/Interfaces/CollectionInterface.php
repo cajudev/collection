@@ -4,10 +4,13 @@ namespace Cajudev\Interfaces;
 
 interface CollectionInterface
 {
-    public function count(int $mode = COUNT_NORMAL): int;
+    public function get(...$keys);
+    public function set(string $key, $value);
 
     public function unshift(...$values): CollectionInterface;
     public function push(...$values): CollectionInterface;
+
+    public function count(int $mode = COUNT_NORMAL): int;
 
     public function for(int $i, int $add, callable $callback, bool $arrayAsCollection = false);
     public function each(callable $callback, bool $arrayAsCollection = false);
@@ -53,9 +56,6 @@ interface CollectionInterface
 
     public function lower(): CollectionInterface;
     public function upper(): CollectionInterface;
-
-    public function get(...$keys);
-    public function set(string $key, $value);
 
     public static function combine($keys, $values): CollectionInterface;
     public static function range($start, $end, $step = 1): CollectionInterface;

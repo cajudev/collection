@@ -10,4 +10,5 @@ interface Sortable
     public function arsort();
     public function ksort();
     public function krsort();
+    public function usort(callable $callback);
 }

@@ -784,49 +784,52 @@ class CollectionTest extends TestCase
     public function test_sort_should_order_content()
     {
         $collection = new Collection(['three' => 3, 'eight' => 8, 'two' => 2]);
-        $collection->sort();
         $expect = [2, 3, 8];
-        $this->assertSame($expect, $collection->get());
+        $this->assertSame($expect, $collection->sort()->get());
     }
 
     public function test_rsort_should_order_content()
     {
         $collection = new Collection(['three' => 3, 'eight' => 8, 'two' => 2]);
-        $collection->rsort();
         $expect = [8, 3, 2];
-        $this->assertSame($expect, $collection->get());
+        $this->assertSame($expect, $collection->rsort()->get());
     }
 
     public function test_asort_should_order_content()
     {
         $collection = new Collection(['three' => 3, 'eight' => 8, 'two' => 2]);
-        $collection->asort();
         $expect = ['two' => 2, 'three' => 3, 'eight' => 8];
-        $this->assertSame($expect, $collection->get());
+        $this->assertSame($expect, $collection->asort()->get());
     }
 
     public function test_arsort_should_order_content()
     {
         $collection = new Collection(['three' => 3, 'eight' => 8, 'two' => 2]);
-        $collection->arsort();
         $expect = ['eight' => 8, 'three' => 3, 'two' => 2];
-        $this->assertSame($expect, $collection->get());
+        $this->assertSame($expect, $collection->arsort()->get());
     }
 
     public function test_ksort_should_order_content()
     {
         $collection = new Collection(['three' => 3, 'eight' => 8, 'two' => 2]);
-        $collection->ksort();
         $expect = ['eight' => 8, 'three' => 3, 'two' => 2];
-        $this->assertSame($expect, $collection->get());
+        $this->assertSame($expect, $collection->ksort()->get());
     }
 
     public function test_krsort_should_order_content()
     {
         $collection = new Collection(['three' => 3, 'eight' => 8, 'two' => 2]);
-        $collection->krsort();
         $expect = ['two' => 2, 'three' => 3, 'eight' => 8];
-        $this->assertSame($expect, $collection->get());
+        $this->assertSame($expect, $collection->krsort()->get());
+    }
+
+    public function test_usort_should_order_content()
+    {
+        $collection = new Collection(['three' => 3, 'eight' => 8, 'two' => 2]);
+        $expect = ['two' => 2, 'three' => 3, 'eight' => 8];
+        $this->assertSame($expect, $collection->krsort(function ($a, $b) {
+            return $a <=> $b;
+        })->get());
     }
 
     public function test_unique_should_remove_duplicated_values()
