@@ -1,36 +1,35 @@
 {
-    "name": "cajudev/collection",
-    "description": "Making php more object oriented.",
-    "keywords": [
-        "object oriented",
-        "array",
-        "collection",
-        "composer",
-        "php"
-    ],
-    "license": "MIT",
-    "homepage": "https://github.com/cajudev/collection",
-    "type": "library",
-    "authors": [
-        {
-            "name": "Richard Lopes",
-            "email": "contato.richardlopes@outlook.com"
-        }
-    ],
-    "autoload": {
-        "psr-4": {
-            "Cajudev\\": [
-                "src/",
-                "tests/"
-            ]
-        }
-    },
-    "require": {
-        "php": "^7.0"
-    },
-    "require-dev": {
-        "phpunit/phpunit": "^6",
-        "php-coveralls/php-coveralls": "^2",
-        "phpdocumentor/phpdocumentor": "2.*"
+  "name": "cajudev/collection",
+  "description": "Making php more object oriented.",
+  "keywords": [
+    "array",
+    "collection",
+    "arraylist",
+    "list"
+  ],
+  "license": "MIT",
+  "homepage": "https://github.com/cajudev/collection",
+  "type": "library",
+  "authors": [
+    {
+      "name": "Richard Lopes",
+      "email": "contato.richardlopes@outlook.com"
     }
+  ],
+  "autoload": {
+    "psr-4": {
+      "Cajudev\\": [
+        "src/",
+        "tests/"
+      ]
+    }
+  },
+  "require": {
+    "php": "^7.0"
+  },
+  "require-dev": {
+    "phpunit/phpunit": "^6",
+    "php-coveralls/php-coveralls": "^2",
+    "phpdocumentor/phpdocumentor": "2.*"
+  }
 }
