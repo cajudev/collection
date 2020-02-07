@@ -21,7 +21,7 @@ class CallbackTest extends TestCase
         $callback = new Callback(function ($key, $value) {
             return [$key => $value];
         });
-        $result = $callback->exec('lorem', 'ipsum');
+        $result = $callback->exec($this, 'lorem', 'ipsum');
         $this->assertEquals(['lorem' => 'ipsum'], $result);
     }
 
@@ -30,13 +30,48 @@ class CallbackTest extends TestCase
         $callback = new Callback(function ($key, $value) {
             return [$key => $value];
         });
-        $result = $callback('lorem', 'ipsum');
+        $result = $callback($this, 'lorem', 'ipsum');
         $this->assertEquals(['lorem' => 'ipsum'], $result);
     }
 
     public function test_should_execute_the_callback_using_callable_array()
     {
         $callback = new Callback([$this, 'assertTrue']);
-        $result = $callback->exec(true, true);
+        $result = $callback->exec(true, true, true);
+    }
+
+    public function test_should_receive_only_value_as_argument()
+    {
+        $callback = new Callback(function ($value) {
+            return $value;
+        });
+        $result = $callback->exec($this, 'lorem', 'ipsum');
+        $this->assertEquals('ipsum', $result);
+    }
+
+    public function test_should_receive_key_and_value_as_argument()
+    {
+        $callback = new Callback(function ($key, $value) {
+            return [$key, $value];
+        });
+        $result = $callback->exec($this, 'lorem', 'ipsum');
+        $this->assertEquals(['lorem', 'ipsum'], $result);
+    }
+
+    public function test_should_receive_self_reference_key_and_value_as_argument()
+    {
+        $callback = new Callback(function ($self, $key, $value) {
+            return [$self, $key, $value];
+        });
+        $result = $callback->exec($this, 'lorem', 'ipsum');
+        $this->assertEquals([$this, 'lorem', 'ipsum'], $result);
+    }
+
+    public function test_should_throws_exception_when_callback_has_more_than_allowed_arguments()
+    {
+        $this->expectException(\InvalidArgumentException::class);
+        $callback = new Callback(function ($self, $key, $value, $invalid) {
+        });
+        $callback->exec($this, 'lorem', 'ipsum');
     }
 }

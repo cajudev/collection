@@ -18,10 +18,15 @@ class Callback
         return $this->exec(...$args);
     }
 
-    public function exec($key, $value)
+    public function exec($self, $key, $value)
     {
         $callback = $this->callback;
-        return $this->args()->length > 1 ? $callback($key, $value) : $callback($value);
+        switch ($this->args()->length) {
+            case 1: return $callback($value);
+            case 2: return $callback($key, $value);
+            case 3: return $callback($self, $key, $value);
+            default: throw new \InvalidArgumentException('Arguments number incorrect');
+        }
     }
 
     public function args(): CollectionInterface

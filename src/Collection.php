@@ -92,7 +92,7 @@ class Collection implements CollectionInterface, \ArrayAccess, \IteratorAggregat
         $callback = new Callback($callback);
         for ($i; ($add >= 0 ? $i < $count : $i >= 0); $i += $add) {
             $value = static::parse($this->content[$keys[$i]], $array_as_collection);
-            $callback->exec($keys[$i], $value);
+            $callback->exec($this, $keys[$i], $value);
         }
     }
 
@@ -101,7 +101,7 @@ class Collection implements CollectionInterface, \ArrayAccess, \IteratorAggregat
         $callback = new Callback($callback);
         foreach ($this->content as $key => $value) {
             $value = static::parse($value, $array_as_collection);
-            $callback->exec($key, $value);
+            $callback->exec($this, $key, $value);
         }
     }
 
@@ -111,7 +111,7 @@ class Collection implements CollectionInterface, \ArrayAccess, \IteratorAggregat
         $iterator = new \RecursiveArrayIterator($this->content);
         foreach (new \RecursiveIteratorIterator($iterator, $type) as $key => $value) {
             $value = static::parse($value, $array_as_collection);
-            $callback->exec($key, $value);
+            $callback->exec($this, $key, $value);
         }
     }
 
@@ -132,7 +132,7 @@ class Collection implements CollectionInterface, \ArrayAccess, \IteratorAggregat
         foreach ($this->content as $key => $value) {
             $value  = static::parse($value, $array_as_collection);
             $n_args = $callback->args()->length;
-            $result = $callback->exec($key, $value);
+            $result = $callback->exec($this, $key, $value);
             $value  = $n_args > 1 ? reset($result) : $result;
             $return[$n_args > 1 ? key($result) : $key] = is_array($value) ? static::sanitize($value) : static::parse($value);
         }
@@ -145,7 +145,7 @@ class Collection implements CollectionInterface, \ArrayAccess, \IteratorAggregat
         $callback = new Callback($callback);
         foreach ($this->content as $key => $value) {
             $value = static::parse($value, $array_as_collection);
-            if ($callback->exec($key, $value)) {
+            if ($callback->exec($this, $key, $value)) {
                 $return[$key] = $value;
             }
         }
@@ -169,7 +169,7 @@ class Collection implements CollectionInterface, \ArrayAccess, \IteratorAggregat
         $callback = new Callback($callback);
         foreach ($this->content as $key => $value) {
             $value = static::parse($value, $array_as_collection);
-            if ($callback->exec($key, $value)) {
+            if ($callback->exec($this, $key, $value)) {
                 return $this->return($value);
             }
         }
