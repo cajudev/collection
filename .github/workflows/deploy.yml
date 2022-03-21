@@ -31,7 +31,7 @@ jobs:
 
     - name: Run tests
       env:
-        XDEBUG_MODE: coverag
+        XDEBUG_MODE: coverage
       run: php vendor/bin/phpunit --configuration phpunit.xml
       
     - name: Upload coverage results
