@@ -1,11 +1,5 @@
 name: Deploy
 
-on:
-  push:
-    branches: [ v2 ]
-  pull_request:
-    branches: [ v2 ]
-
 jobs:
   build:
 
