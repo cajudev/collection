@@ -11,28 +11,28 @@ interface Set
     /**
      * Perform a union of sets
      *
-     * @return mixed
+     * @return static
      */
-    public function union(): Set;
+    public function union(): static;
 
     /**
      * Perform a difference of sets
      *
-     * @return mixed
+     * @return static
      */
-    public function diff(): Set;
+    public function diff(): static;
 
     /**
      * Perform a intersection of sets
      *
-     * @return mixed
+     * @return static
      */
-    public function intersect(): Set;
+    public function intersect(): static;
 
     /**
      * Return the cartesian product of the sets
      *
-     * @return mixed
+     * @return static
      */
-    public function cartesian(): Set;
+    public function cartesian(): static;
 }

@@ -29,17 +29,17 @@ interface CollectionInterface
      * Insert elements on the beginning of the collection
      *
      * @param mixed ...$values
-     * @return CollectionInterface
+     * @return static
      */
-    public function unshift(...$values): CollectionInterface;
+    public function unshift(...$values): static;
 
     /**
      * Insert elements on final of the collection
      *
      * @param mixed ...$values
-     * @return CollectionInterface
+     * @return static
      */
-    public function push(...$values): CollectionInterface;
+    public function push(...$values): static;
 
     /**
      * Count the number of elements of the collection
@@ -99,18 +99,18 @@ interface CollectionInterface
      *
      * @param callable $callback
      * @param bool $array_as_collection
-     * @return CollectionInterface
+     * @return static
      */
-    public function map(callable $callback, bool $array_as_collection = false): CollectionInterface;
+    public function map(callable $callback, bool $array_as_collection = false): static;
 
     /**
      * Filter the elements of the collection
      *
      * @param callable $callback
      * @param bool $array_as_collection
-     * @return CollectionInterface
+     * @return static
      */
-    public function filter(callable $callback, bool $array_as_collection = false): CollectionInterface;
+    public function filter(callable $callback, bool $array_as_collection = false): static;
 
     /**
      * Reduce the collection to single value
@@ -203,30 +203,30 @@ interface CollectionInterface
     /**
      * Shuffle the elements of the collection
      *
-     * @return CollectionInterface
+     * @return static
      */
-    public function shuffle(): CollectionInterface;
+    public function shuffle(): static;
 
     /**
      * Invert the key and values of the collection
      *
-     * @return CollectionInterface
+     * @return static
      */
-    public function flip(): CollectionInterface;
+    public function flip(): static;
 
     /**
      * Return a new collection containing only the keys
      *
-     * @return CollectionInterface
+     * @return static
      */
-    public function keys(): CollectionInterface;
+    public function keys(): static;
 
     /**
      * Return a new collection reseting the keys
      *
-     * @return CollectionInterface
+     * @return static
      */
-    public function values(): CollectionInterface;
+    public function values(): static;
 
     /**
      * Return a new collection containing only elements of a given column
@@ -242,17 +242,17 @@ interface CollectionInterface
      *
      * @param int $size
      * @param bool $preserve_keys
-     * @return CollectionInterface
+     * @return static
      */
-    public function chunk(int $size, bool $preserve_keys = false): CollectionInterface;
+    public function chunk(int $size, bool $preserve_keys = false): static;
 
     /**
      * Remove duplicated elements
      *
      * @param int $flags
-     * @return CollectionInterface
+     * @return static
      */
-    public function unique(int $flags = SORT_STRING): CollectionInterface;
+    public function unique(int $flags = SORT_STRING): static;
 
     /**
      * Return the first non null value of the collection
@@ -264,17 +264,17 @@ interface CollectionInterface
     /**
      * Merge the elements of the collection
      *
-     * @return CollectionInterface
+     * @return static
      */
-    public function merge(): CollectionInterface;
+    public function merge(): static;
 
     /**
      * Return the inverse of the collection
      *
-     * @param null $preserve_keys
-     * @return CollectionInterface
+     * @param bool $preserve_keys
+     * @return static
      */
-    public function reverse($preserve_keys = null): CollectionInterface;
+    public function reverse(bool $preserve_keys = false): static;
 
     /**
      * Find a value of the collection and return its key
@@ -302,25 +302,25 @@ interface CollectionInterface
     /**
      * Transform all the keys of the collection to lower case
      *
-     * @return CollectionInterface
+     * @return static
      */
-    public function lower(): CollectionInterface;
+    public function lower(): static;
 
     /**
      * Transform all the keys of the collection to upper case
      *
-     * @return CollectionInterface
+     * @return static
      */
-    public function upper(): CollectionInterface;
+    public function upper(): static;
 
     /**
      * Combine two arrays/collection into one
      *
      * @param $keys
      * @param $values
-     * @return CollectionInterface
+     * @return static
      */
-    public static function combine($keys, $values): CollectionInterface;
+    public static function combine($keys, $values): static;
 
     /**
      * Generate a new collection by a given range
@@ -328,7 +328,7 @@ interface CollectionInterface
      * @param $start
      * @param $end
      * @param int $step
-     * @return CollectionInterface
+     * @return static
      */
-    public static function range($start, $end, $step = 1): CollectionInterface;
+    public static function range($start, $end, $step = 1): static;
 }

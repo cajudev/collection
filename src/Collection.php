@@ -46,7 +46,7 @@ class Collection implements CollectionInterface, \ArrayAccess, \IteratorAggregat
         throw new \InvalidArgumentException('Invalid Type: Argument must be an array or object.');
     }
 
-    public function setByReference(array &$array = null): CollectionInterface
+    public function setByReference(array &$array = null): static
     {
         $array = $array ?? [];
         $this->content = &$array;
@@ -69,14 +69,14 @@ class Collection implements CollectionInterface, \ArrayAccess, \IteratorAggregat
         return new CollectionIterator($this->content);
     }
 
-    public function unshift(...$values): CollectionInterface
+    public function unshift(...$values): static
     {
         array_unshift($this->content, ...static::sanitize($values));
         $this->increment(count($values));
         return $this;
     }
 
-    public function push(...$values): CollectionInterface
+    public function push(...$values): static
     {
         array_push($this->content, ...static::sanitize($values));
         $this->increment(count($values));
@@ -124,7 +124,7 @@ class Collection implements CollectionInterface, \ArrayAccess, \IteratorAggregat
         return in_array(static::parse($value), $this->content);
     }
 
-    public function map(callable $callback, bool $array_as_collection = false): CollectionInterface
+    public function map(callable $callback, bool $array_as_collection = false): static
     {
         $return = [];
         $callback = new Callback($callback);
@@ -138,7 +138,7 @@ class Collection implements CollectionInterface, \ArrayAccess, \IteratorAggregat
         return $this->return($return);
     }
 
-    public function filter(callable $callback, bool $array_as_collection = false): CollectionInterface
+    public function filter(callable $callback, bool $array_as_collection = false): static
     {
         $return = [];
         $callback = new Callback($callback);
@@ -222,24 +222,24 @@ class Collection implements CollectionInterface, \ArrayAccess, \IteratorAggregat
         return $this->return($this[array_rand($this->content, $num)]);
     }
 
-    public function shuffle(): CollectionInterface
+    public function shuffle(): static
     {
         $content = $this->content;
         shuffle($content);
         return $this->return($content);
     }
 
-    public function flip(): CollectionInterface
+    public function flip(): static
     {
         return $this->return(array_flip($this->content));
     }
 
-    public function keys(): CollectionInterface
+    public function keys(): static
     {
         return $this->return(array_keys($this->content));
     }
 
-    public function values(): CollectionInterface
+    public function values(): static
     {
         return $this->return(array_values($this->content));
     }
@@ -249,12 +249,12 @@ class Collection implements CollectionInterface, \ArrayAccess, \IteratorAggregat
         return $this->return(array_column($this->content, $key, $index));
     }
 
-    public function chunk(int $size, bool $preserve_keys = false): CollectionInterface
+    public function chunk(int $size, bool $preserve_keys = false): static
     {
         return $this->return(array_chunk($this->content, $size, $preserve_keys));
     }
 
-    public function unique(int $flags = SORT_STRING): CollectionInterface
+    public function unique(int $flags = SORT_STRING): static
     {
         return $this->return(array_unique($this->content, $flags));
     }
@@ -269,12 +269,12 @@ class Collection implements CollectionInterface, \ArrayAccess, \IteratorAggregat
         return null;
     }
 
-    public function merge(): CollectionInterface
+    public function merge(): static
     {
         return $this->reduce('array_merge');
     }
 
-    public function reverse($preserve_keys = null): CollectionInterface
+    public function reverse(bool $preserve_keys = false): static
     {
         return $this->return(array_reverse($this->content, $preserve_keys));
     }
@@ -294,7 +294,7 @@ class Collection implements CollectionInterface, \ArrayAccess, \IteratorAggregat
         return $this->return(end($this->content));
     }
 
-    public function lower(): CollectionInterface
+    public function lower(): static
     {
         $lower = function (&$array) use (&$lower) {
             $array = array_change_key_case($array, CASE_LOWER);
@@ -308,7 +308,7 @@ class Collection implements CollectionInterface, \ArrayAccess, \IteratorAggregat
         return $this;
     }
 
-    public function upper(): CollectionInterface
+    public function upper(): static
     {
         $upper = function (&$array) use (&$upper) {
             $array = array_change_key_case($array, CASE_UPPER);
@@ -406,12 +406,12 @@ class Collection implements CollectionInterface, \ArrayAccess, \IteratorAggregat
         return $object instanceof static;
     }
 
-    public static function combine($keys, $values): CollectionInterface
+    public static function combine($keys, $values): static
     {
         return new static(array_combine(static::parse($keys), static::parse($values)));
     }
 
-    public static function range($start, $end, $step = 1): CollectionInterface
+    public static function range($start, $end, $step = 1): static
     {
         return new static(range($start, $end, $step));
     }

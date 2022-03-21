@@ -11,50 +11,50 @@ interface Sortable
     /**
      * Sort the elements of the collection in ascending order
      *
-     * @return mixed
+     * @return static
      */
-    public function sort(): Sortable;
+    public function sort(): static;
 
     /**
      * Sort the elements of the collection in descending order
      *
-     * @return mixed
+     * @return static
      */
-    public function rsort(): Sortable;
+    public function rsort(): static;
 
     /**
      * Sort the elements of the collection associatively in ascending order
      *
-     * @return mixed
+     * @return static
      */
-    public function asort(): Sortable;
+    public function asort(): static;
 
     /**
      * Sort the elements of the collection associatively in descending order
      *
-     * @return mixed
+     * @return static
      */
-    public function arsort(): Sortable;
+    public function arsort(): static;
 
     /**
      * Sort the elements of the collection using keys in ascending order
      *
-     * @return mixed
+     * @return static
      */
-    public function ksort(): Sortable;
+    public function ksort(): static;
 
     /**
      * Sort the elements of the collection using keys in descending order
      *
-     * @return mixed
+     * @return static
      */
-    public function krsort(): Sortable;
+    public function krsort(): static;
 
     /**
      * Sort the elements of the collection using a custom function
      *
      * @param callable $callback
-     * @return mixed
+     * @return static
      */
-    public function usort(callable $callback): Sortable;
+    public function usort(callable $callback): static;
 }

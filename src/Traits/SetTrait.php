@@ -6,17 +6,17 @@ use Cajudev\Interfaces\Set;
 
 trait SetTrait
 {
-    public function union(): Set
+    public function union(): static
     {
         return $this->merge()->unique();
     }
 
-    public function diff(): Set
+    public function diff(): static
     {
         return $this->reduce('array_diff');
     }
 
-    public function outer(): Set
+    public function outer(): static
     {
         return $this->return([
             $this->diff()->values()->get(),
@@ -24,12 +24,12 @@ trait SetTrait
         ]);
     }
 
-    public function intersect(): Set
+    public function intersect(): static
     {
         return $this->reduce('array_intersect');
     }
 
-    public function cartesian(): Set
+    public function cartesian(): static
     {
         $cartesian = [[]];
         foreach ($this->content as $key => $values) {
