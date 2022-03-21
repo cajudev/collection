@@ -30,6 +30,8 @@ jobs:
       run: composer install --prefer-dist --no-progress
 
     - name: Run tests
+      env:
+        XDEBUG_MODE: coverag
       run: php vendor/bin/phpunit --configuration phpunit.xml
       
     - name: Upload coverage results
