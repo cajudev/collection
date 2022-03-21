@@ -17,7 +17,8 @@ class CollectionTest extends TestCase
 
     public function test_construct_should_parse_attributes_when_received_object()
     {
-        $object = new class {
+        $object = new class
+        {
             private $private = 'lorem';
             public $public = 'ipsum';
             protected $protected = 'dolor';
@@ -499,7 +500,7 @@ class CollectionTest extends TestCase
     {
         $collection = new Collection([['lorem' => 'ipsum'], ['dolor' => 'sit']]);
         foreach ($collection as $key => $value) {
-            $this->assertInternalType('array', $value);
+            $this->assertIsArray($value);
         }
     }
 
@@ -507,7 +508,7 @@ class CollectionTest extends TestCase
     {
         $collection = new Collection(['lorem', 'ipsum', 'dolor', 'sit']);
         $collection->each(function ($value) use ($collection) {
-            $this->assertInternalType('string', $value);
+            $this->assertIsString($value);
         });
     }
 
@@ -523,7 +524,7 @@ class CollectionTest extends TestCase
     {
         $collection = new Collection([['lorem' => 'ipsum'], ['dolor' => 'sit']]);
         $collection->each(function ($value) {
-            $this->assertInternalType('array', $value);
+            $this->assertIsArray($value);
         });
     }
 
@@ -539,7 +540,7 @@ class CollectionTest extends TestCase
     {
         $collection = new Collection(['lorem', 'ipsum', 'dolor', 'sit']);
         $collection->for(0, 2, function ($value) use ($collection) {
-            $this->assertInternalType('string', $value);
+            $this->assertIsString($value);
         });
     }
 
@@ -555,7 +556,7 @@ class CollectionTest extends TestCase
     {
         $collection = new Collection([['lorem' => 'ipsum'], ['dolor' => 'sit']]);
         $collection->for(0, 2, function ($value) {
-            $this->assertInternalType('array', $value);
+            $this->assertIsArray($value);
         });
     }
 
@@ -597,7 +598,7 @@ class CollectionTest extends TestCase
     {
         $collection = new Collection([['lorem' => 'ipsum'], ['dolor' => 'sit']]);
         $collection->map(function ($key, $value) {
-            $this->assertInternalType('array', $value);
+            $this->assertIsArray($value);
             return [$key => $value];
         });
     }
@@ -635,7 +636,7 @@ class CollectionTest extends TestCase
     {
         $collection = new Collection([['lorem' => 'ipsum'], ['dolor' => 'sit']]);
         $collection->filter(function ($key, $value) {
-            return $this->assertInternalType('array', $value);
+            return $this->assertIsArray($value);
         });
     }
 
@@ -660,8 +661,8 @@ class CollectionTest extends TestCase
     {
         $collection = new Collection([['lorem' => 'ipsum'], ['dolor' => 'sit']]);
         $result = $collection->reduce(function ($a, $b) {
-            $this->assertInternalType('array', $a);
-            $this->assertInternalType('array', $b);
+            $this->assertIsArray($a);
+            $this->assertIsArray($b);
         });
     }
 
@@ -705,7 +706,7 @@ class CollectionTest extends TestCase
     {
         $collection = new Collection([['lorem' => 'ipsum'], ['dolor' => 'sit']]);
         $collection->find(function ($key, $value) {
-            return $this->assertInternalType('array', $value);
+            return $this->assertIsArray($value);
         });
     }
 
@@ -716,7 +717,7 @@ class CollectionTest extends TestCase
             return $this->assertInstanceOf(Collection::class, $value);
         }, true);
     }
-    
+
     public function test_chunk_should_divide_object_into_parts()
     {
         $collection = new Collection([1, 2, 3, 4, 5]);
@@ -766,7 +767,7 @@ class CollectionTest extends TestCase
         $collection['KEYS']   = new Collection(['lorem', 'ipsum']);
         $collection['VALUES'] = new Collection(['dolor', 'amet']);
         $collection = Collection::combine($collection['KEYS'], $collection['VALUES']);
-        $expect     = new Collection(['lorem' => 'dolor', 'ipsum'=> 'amet']);
+        $expect     = new Collection(['lorem' => 'dolor', 'ipsum' => 'amet']);
         $this->assertEquals($expect, $collection);
     }
 
@@ -1052,7 +1053,7 @@ class CollectionTest extends TestCase
             if (is_string($value)) {
                 return;
             }
-            $this->assertInternalType('array', $value);
+            $this->assertIsArray($value);
         }, \RecursiveIteratorIterator::SELF_FIRST);
     }
 

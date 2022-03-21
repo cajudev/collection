@@ -6,7 +6,8 @@ use PHPUnit\Framework\TestCase;
 
 class CollectionIteratorTest extends TestCase
 {
-    public function setUp() {
+    public function setUp(): void
+    {
         $this->iterator = new CollectionIterator(['lorem' => 'ipsum', 'dolor' => 'sit', 'amet' => 'consectetur']);
     }
 

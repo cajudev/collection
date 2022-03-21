@@ -6,7 +6,6 @@ use Cajudev\ObjectParser;
 use Cajudev\CollectionIterator;
 
 use Cajudev\Interfaces\Set;
-use Cajudev\Interfaces\Mixed;
 use Cajudev\Interfaces\Sortable;
 use Cajudev\Interfaces\CollectionInterface;
 
@@ -28,29 +27,29 @@ class Collection implements CollectionInterface, \ArrayAccess, \IteratorAggregat
         $this->content = $this->construct($content);
         $this->count();
     }
-  
+
     private function construct($content): array
     {
         if ($content instanceof static) {
             return $content->get();
         }
-  
+
         if (is_object($content)) {
             $parser = new ObjectParser($content);
             return $parser->parse();
         }
-  
+
         if (is_array($content)) {
             return static::sanitize($content);
         }
-  
+
         throw new \InvalidArgumentException('Invalid Type: Argument must be an array or object.');
     }
 
     public function setByReference(array &$array = null): CollectionInterface
     {
         $array = $array ?? [];
-        $this->content =& $array;
+        $this->content = &$array;
         $this->count();
         return $this;
     }
@@ -249,7 +248,7 @@ class Collection implements CollectionInterface, \ArrayAccess, \IteratorAggregat
     {
         return $this->return(array_column($this->content, $key, $index));
     }
-    
+
     public function chunk(int $size, bool $preserve_keys = false): CollectionInterface
     {
         return $this->return(array_chunk($this->content, $size, $preserve_keys));
