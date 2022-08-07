@@ -31,5 +31,10 @@
     "phpunit/phpunit": ">=6",
     "php-coveralls/php-coveralls": ">=2",
     "phpdocumentor/phpdocumentor": ">=2"
+  },
+  "config": {
+    "allow-plugins": {
+      "symfony/flex": true
+    }
   }
 }
